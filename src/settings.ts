@@ -48,6 +48,7 @@ organizer: {{organizer}}
 meeting_uid: {{uid}}
 meeting_dedup_key: {{dedup_key}}
 tags: {{tags}}
+cssclasses: [meetings-plus-note]
 ---
 
 # {{title}}

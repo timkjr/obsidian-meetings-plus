@@ -335,6 +335,11 @@
 	gap: 2px;
 }
 
+/* hide frontmatter properties on meeting notes (opt-in via cssclasses) */
+.meetings-plus-note .metadata-container {
+	display: none;
+}
+
 /* form helpers */
 .meetings-plus-input-wide {
 	width: 100%;
