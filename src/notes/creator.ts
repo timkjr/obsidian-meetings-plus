@@ -25,7 +25,7 @@ export async function createOrOpenMeetingNote(
 
 	if (!calendar.createNotes) {
 		new Notice(
-			`Calendar Plus: standalone notes disabled for "${calendar.name}"`
+			`Meetings Plus: standalone notes disabled for "${calendar.name}"`
 		);
 		return null;
 	}
@@ -50,7 +50,7 @@ export async function createOrOpenMeetingNote(
 		try {
 			await runTemplaterIfAvailable(app, file);
 		} catch (e) {
-			console.warn("[Calendar Plus] Templater post-processing failed", e);
+			console.warn("[Meetings Plus] Templater post-processing failed", e);
 		}
 	}
 

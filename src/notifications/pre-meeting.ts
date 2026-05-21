@@ -48,7 +48,7 @@ export class PreMeetingScheduler {
 		const notice = new Notice(text, 30_000);
 		const el = (notice as unknown as { noticeEl?: HTMLElement }).noticeEl;
 		if (el) {
-			el.addClass("calendar-plus-notice-clickable");
+			el.addClass("meetings-plus-notice-clickable");
 			el.addEventListener("click", () => {
 				this.deps.onClickMeeting(meeting);
 				notice.hide();

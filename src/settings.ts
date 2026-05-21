@@ -1,7 +1,7 @@
 import { CalendarConfig } from "./types";
 import { SETTINGS_VERSION } from "./constants";
 
-export interface CalendarPlusSettings {
+export interface MeetingsPlusSettings {
 	version: number;
 	refreshIntervalMinutes: number;
 	lookAheadDays: number;
@@ -94,7 +94,7 @@ export function makeDefaultCalendar(
 	};
 }
 
-export const DEFAULT_SETTINGS: CalendarPlusSettings = {
+export const DEFAULT_SETTINGS: MeetingsPlusSettings = {
 	version: SETTINGS_VERSION,
 	refreshIntervalMinutes: 15,
 	lookAheadDays: 7,

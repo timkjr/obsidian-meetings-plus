@@ -1,8 +1,8 @@
 import { ItemView, Notice, WorkspaceLeaf, setIcon } from "obsidian";
-import CalendarPlusPlugin from "../main";
+import MeetingsPlusPlugin from "../main";
 import {
 	PLUGIN_NAME,
-	VIEW_TYPE_CALENDAR_PLUS,
+	VIEW_TYPE_MEETINGS_PLUS,
 } from "../constants";
 import {
 	CalendarConfig,
@@ -24,17 +24,17 @@ interface CollapsedState {
 	tomorrow: boolean;
 }
 
-export class CalendarPlusView extends ItemView {
+export class MeetingsPlusView extends ItemView {
 	private collapsed: CollapsedState = { earlier: true, tomorrow: true };
 	private unsubRefresh: (() => void) | null = null;
 	private rerenderTimer: number | null = null;
 
-	constructor(leaf: WorkspaceLeaf, private plugin: CalendarPlusPlugin) {
+	constructor(leaf: WorkspaceLeaf, private plugin: MeetingsPlusPlugin) {
 		super(leaf);
 	}
 
 	getViewType(): string {
-		return VIEW_TYPE_CALENDAR_PLUS;
+		return VIEW_TYPE_MEETINGS_PLUS;
 	}
 
 	getDisplayText(): string {
@@ -82,7 +82,7 @@ export class CalendarPlusView extends ItemView {
 	render(): void {
 		this.contentEl.empty();
 		const root = this.contentEl.createDiv({
-			cls: "calendar-plus-container",
+			cls: "meetings-plus-container",
 		});
 
 		const calendars = this.plugin.settings.calendars;
@@ -171,14 +171,14 @@ export class CalendarPlusView extends ItemView {
 
 		if (todays.length === 0 && tomorrows.length === 0) {
 			root.createDiv({
-				cls: "calendar-plus-empty",
+				cls: "meetings-plus-empty",
 				text: "Nothing scheduled.",
 			});
 		}
 	}
 
 	private renderEmptyState(parent: HTMLElement): void {
-		const box = parent.createDiv({ cls: "calendar-plus-empty-cta" });
+		const box = parent.createDiv({ cls: "meetings-plus-empty-cta" });
 		box.createEl("p", {
 			text: "Add a calendar to start seeing meetings here.",
 		});
@@ -194,12 +194,12 @@ export class CalendarPlusView extends ItemView {
 		errors: CalendarStatus[],
 		calendars: CalendarConfig[]
 	): void {
-		const wrap = parent.createDiv({ cls: "calendar-plus-errors" });
+		const wrap = parent.createDiv({ cls: "meetings-plus-errors" });
 		for (const e of errors) {
 			if (e.status.kind !== "error") continue;
 			const cal = calendars.find((c) => c.id === e.calendarId);
 			wrap.createDiv({
-				cls: "calendar-plus-error-row",
+				cls: "meetings-plus-error-row",
 				text: `${cal?.name ?? "Calendar"}: ${e.status.message}`,
 			});
 		}
@@ -214,21 +214,21 @@ export class CalendarPlusView extends ItemView {
 		key: "earlier" | "tomorrow" | null
 	): void {
 		if (meetings.length === 0) return;
-		const section = parent.createDiv({ cls: "calendar-plus-section" });
+		const section = parent.createDiv({ cls: "meetings-plus-section" });
 		const isCollapsed = collapsible && key ? this.collapsed[key] : false;
-		if (isCollapsed) section.addClass("calendar-plus-collapsed");
+		if (isCollapsed) section.addClass("meetings-plus-collapsed");
 
 		const header = section.createDiv({
-			cls: "calendar-plus-section-header",
+			cls: "meetings-plus-section-header",
 		});
-		const chevron = header.createSpan({ cls: "calendar-plus-chevron" });
+		const chevron = header.createSpan({ cls: "meetings-plus-chevron" });
 		setIcon(chevron, "chevron-down");
 		header.createSpan({
-			cls: "calendar-plus-section-title",
+			cls: "meetings-plus-section-title",
 			text: title,
 		});
 		header.createSpan({
-			cls: "calendar-plus-section-count",
+			cls: "meetings-plus-section-count",
 			text: String(meetings.length),
 		});
 		if (collapsible && key) {
@@ -237,10 +237,10 @@ export class CalendarPlusView extends ItemView {
 				this.render();
 			});
 		} else {
-			chevron.addClass("calendar-plus-chevron-hidden");
+			chevron.addClass("meetings-plus-chevron-hidden");
 		}
 
-		const body = section.createDiv({ cls: "calendar-plus-section-body" });
+		const body = section.createDiv({ cls: "meetings-plus-section-body" });
 		for (const meeting of meetings) {
 			renderMeetingRow({
 				parent: body,

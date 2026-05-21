@@ -1,6 +1,6 @@
 {
-	"id": "calendar-plus",
-	"name": "Calendar Plus",
+	"id": "meetings-plus",
+	"name": "Meetings Plus",
 	"version": "0.1.0",
 	"minAppVersion": "1.4.0",
 	"description": "Subscribe to calendars and create pre-filled meeting notes in one click. No drag-and-drop, no Outlook required. ICS-based, privacy-first.",

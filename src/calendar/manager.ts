@@ -1,5 +1,5 @@
 import { App } from "obsidian";
-import { CalendarPlusSettings } from "../settings";
+import { MeetingsPlusSettings } from "../settings";
 import { CalendarConfig, FetchStatus, Meeting } from "../types";
 import { TypedEventBus } from "../util/events";
 import { fetchICS } from "./fetcher";
@@ -24,7 +24,7 @@ export class CalendarManager {
 
 	constructor(
 		private readonly app: App,
-		private readonly getSettings: () => CalendarPlusSettings,
+		private readonly getSettings: () => MeetingsPlusSettings,
 		private readonly persistCache: SaveCallback
 	) {
 		this.cache = new MeetingCache(this.getSettings().cache);
@@ -139,7 +139,7 @@ export class CalendarManager {
 				fetchedAt: Date.now(),
 				message,
 			});
-			console.warn(`[Calendar Plus] Calendar fetch failed for ${cal.name}`);
+			console.warn(`[Meetings Plus] Calendar fetch failed for ${cal.name}`);
 			this.events.emit("refresh:completed", {
 				calendarId: cal.id,
 				ok: false,

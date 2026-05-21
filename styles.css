@@ -1,4 +1,4 @@
-.calendar-plus-container {
+.meetings-plus-container {
 	padding: 10px 12px;
 	display: flex;
 	flex-direction: column;
@@ -6,36 +6,36 @@
 	font-size: var(--font-ui-small);
 }
 
-.calendar-plus-status {
+.meetings-plus-status {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
 }
 
-.calendar-plus-status-left {
+.meetings-plus-status-left {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
 	min-width: 0;
 }
 
-.calendar-plus-status-title {
+.meetings-plus-status-title {
 	font-size: var(--font-ui-medium);
 	font-weight: 600;
 }
 
-.calendar-plus-status-sub {
+.meetings-plus-status-sub {
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 }
 
-.calendar-plus-status-actions {
+.meetings-plus-status-actions {
 	display: flex;
 	gap: 4px;
 }
 
-.calendar-plus-icon-btn {
+.meetings-plus-icon-btn {
 	background: transparent;
 	border: none;
 	color: var(--text-muted);
@@ -47,22 +47,22 @@
 	justify-content: center;
 }
 
-.calendar-plus-icon-btn:hover {
+.meetings-plus-icon-btn:hover {
 	background: var(--background-modifier-hover);
 	color: var(--text-normal);
 }
 
-.calendar-plus-icon-danger:hover {
+.meetings-plus-icon-danger:hover {
 	color: var(--text-error);
 }
 
-.calendar-plus-errors {
+.meetings-plus-errors {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
 
-.calendar-plus-error-row {
+.meetings-plus-error-row {
 	color: var(--text-error);
 	font-size: var(--font-ui-smaller);
 	background: var(--background-modifier-error-rgb);
@@ -71,13 +71,13 @@
 	border-radius: 4px;
 }
 
-.calendar-plus-empty {
+.meetings-plus-empty {
 	color: var(--text-muted);
 	text-align: center;
 	padding: 24px 0;
 }
 
-.calendar-plus-empty-cta {
+.meetings-plus-empty-cta {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -87,7 +87,7 @@
 	text-align: center;
 }
 
-.calendar-plus-current {
+.meetings-plus-current {
 	border: 1px solid var(--interactive-accent);
 	border-radius: 8px;
 	padding: 12px;
@@ -97,13 +97,13 @@
 	gap: 10px;
 }
 
-.calendar-plus-current-top {
+.meetings-plus-current-top {
 	display: flex;
 	gap: 10px;
 	align-items: flex-start;
 }
 
-.calendar-plus-current-info {
+.meetings-plus-current-info {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
@@ -111,7 +111,7 @@
 	min-width: 0;
 }
 
-.calendar-plus-current-status {
+.meetings-plus-current-status {
 	font-size: var(--font-ui-smaller);
 	color: var(--interactive-accent);
 	font-weight: 600;
@@ -119,7 +119,7 @@
 	letter-spacing: 0.04em;
 }
 
-.calendar-plus-current-title {
+.meetings-plus-current-title {
 	font-weight: 600;
 	font-size: var(--font-ui-medium);
 	overflow: hidden;
@@ -127,18 +127,18 @@
 	white-space: nowrap;
 }
 
-.calendar-plus-current-time {
+.meetings-plus-current-time {
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 }
 
-.calendar-plus-current-actions {
+.meetings-plus-current-actions {
 	display: flex;
 	gap: 6px;
 	align-items: center;
 }
 
-.calendar-plus-current-cta {
+.meetings-plus-current-cta {
 	flex: 1;
 	padding: 8px 12px;
 	border-radius: 6px;
@@ -149,11 +149,11 @@
 	font-weight: 500;
 }
 
-.calendar-plus-current-cta:hover {
+.meetings-plus-current-cta:hover {
 	background: var(--interactive-accent-hover);
 }
 
-.calendar-plus-current-link {
+.meetings-plus-current-link {
 	background: transparent;
 	border: 1px solid var(--background-modifier-border);
 	color: var(--text-muted);
@@ -164,12 +164,12 @@
 	align-items: center;
 }
 
-.calendar-plus-current-link:hover {
+.meetings-plus-current-link:hover {
 	background: var(--background-modifier-hover);
 	color: var(--text-normal);
 }
 
-.calendar-plus-section {
+.meetings-plus-section {
 	display: flex;
 	flex-direction: column;
 	border: 1px solid var(--background-modifier-border);
@@ -177,7 +177,7 @@
 	overflow: hidden;
 }
 
-.calendar-plus-section-header {
+.meetings-plus-section-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -186,25 +186,25 @@
 	user-select: none;
 }
 
-.calendar-plus-section-header:hover {
+.meetings-plus-section-header:hover {
 	background: var(--background-modifier-hover);
 }
 
-.calendar-plus-chevron {
+.meetings-plus-chevron {
 	display: inline-flex;
 	transition: transform 120ms ease;
 }
 
-.calendar-plus-collapsed .calendar-plus-chevron {
+.meetings-plus-collapsed .meetings-plus-chevron {
 	transform: rotate(-90deg);
 }
 
-.calendar-plus-section-title {
+.meetings-plus-section-title {
 	flex: 1;
 	font-weight: 500;
 }
 
-.calendar-plus-section-count {
+.meetings-plus-section-count {
 	background: var(--background-modifier-border);
 	color: var(--text-muted);
 	border-radius: 10px;
@@ -212,17 +212,17 @@
 	font-size: var(--font-ui-smaller);
 }
 
-.calendar-plus-section-body {
+.meetings-plus-section-body {
 	display: flex;
 	flex-direction: column;
 	border-top: 1px solid var(--background-modifier-border);
 }
 
-.calendar-plus-collapsed .calendar-plus-section-body {
+.meetings-plus-collapsed .meetings-plus-section-body {
 	display: none;
 }
 
-.calendar-plus-row {
+.meetings-plus-row {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -232,19 +232,19 @@
 	cursor: pointer;
 }
 
-.calendar-plus-row:last-child {
+.meetings-plus-row:last-child {
 	border-bottom: none;
 }
 
-.calendar-plus-row:hover {
+.meetings-plus-row:hover {
 	background: var(--background-modifier-hover);
 }
 
-.calendar-plus-row-has-note .calendar-plus-row-title {
+.meetings-plus-row-has-note .meetings-plus-row-title {
 	color: var(--text-muted);
 }
 
-.calendar-plus-calendar-dot {
+.meetings-plus-calendar-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -252,7 +252,7 @@
 	background: var(--text-muted);
 }
 
-.calendar-plus-row-time {
+.meetings-plus-row-time {
 	color: var(--text-muted);
 	font-variant-numeric: tabular-nums;
 	font-size: var(--font-ui-smaller);
@@ -260,19 +260,19 @@
 	flex-shrink: 0;
 }
 
-.calendar-plus-row-main {
+.meetings-plus-row-main {
 	flex: 1;
 	min-width: 0;
 }
 
-.calendar-plus-row-title {
+.meetings-plus-row-title {
 	font-weight: 500;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.calendar-plus-row-meta {
+.meetings-plus-row-meta {
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 	overflow: hidden;
@@ -280,20 +280,20 @@
 	white-space: nowrap;
 }
 
-.calendar-plus-row-trail {
+.meetings-plus-row-trail {
 	display: flex;
 	gap: 4px;
 	color: var(--text-muted);
 	flex-shrink: 0;
 }
 
-.calendar-plus-row-icon {
+.meetings-plus-row-icon {
 	display: inline-flex;
 	align-items: center;
 }
 
 /* settings tab calendar list */
-.calendar-plus-cal-list {
+.meetings-plus-cal-list {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -302,7 +302,7 @@
 	overflow: hidden;
 }
 
-.calendar-plus-cal-row {
+.meetings-plus-cal-row {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -310,55 +310,55 @@
 	border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.calendar-plus-cal-row:last-child {
+.meetings-plus-cal-row:last-child {
 	border-bottom: none;
 }
 
-.calendar-plus-cal-main {
+.meetings-plus-cal-main {
 	flex: 1;
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
 }
 
-.calendar-plus-cal-name {
+.meetings-plus-cal-name {
 	font-weight: 500;
 }
 
-.calendar-plus-cal-meta {
+.meetings-plus-cal-meta {
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 }
 
-.calendar-plus-cal-actions {
+.meetings-plus-cal-actions {
 	display: flex;
 	gap: 2px;
 }
 
 /* form helpers */
-.calendar-plus-input-wide {
+.meetings-plus-input-wide {
 	width: 100%;
 }
 
-.calendar-plus-input-mono {
+.meetings-plus-input-mono {
 	font-family: var(--font-monospace, monospace);
 }
 
-.calendar-plus-chevron-hidden {
+.meetings-plus-chevron-hidden {
 	visibility: hidden;
 }
 
-.calendar-plus-notice-clickable {
+.meetings-plus-notice-clickable {
 	cursor: pointer;
 }
 
 /* mobile */
 @media (max-width: 480px) {
-	.calendar-plus-row {
+	.meetings-plus-row {
 		flex-wrap: wrap;
 		gap: 6px;
 	}
-	.calendar-plus-row-time {
+	.meetings-plus-row-time {
 		min-width: auto;
 	}
 }

@@ -12,13 +12,13 @@ export interface MeetingRowOptions {
 
 export function renderMeetingRow(opts: MeetingRowOptions): void {
 	const { meeting, calendar, hasNote } = opts;
-	const row = opts.parent.createDiv({ cls: "calendar-plus-row" });
-	if (hasNote) row.addClass("calendar-plus-row-has-note");
+	const row = opts.parent.createDiv({ cls: "meetings-plus-row" });
+	if (hasNote) row.addClass("meetings-plus-row-has-note");
 
-	const dot = row.createDiv({ cls: "calendar-plus-calendar-dot" });
+	const dot = row.createDiv({ cls: "meetings-plus-calendar-dot" });
 	if (calendar) dot.style.background = calendar.color;
 
-	const time = row.createDiv({ cls: "calendar-plus-row-time" });
+	const time = row.createDiv({ cls: "meetings-plus-row-time" });
 	if (meeting.allDay) {
 		time.setText("All-day");
 	} else {
@@ -27,9 +27,9 @@ export function renderMeetingRow(opts: MeetingRowOptions): void {
 		time.setText(`${startLabel}–${endLabel}`);
 	}
 
-	const main = row.createDiv({ cls: "calendar-plus-row-main" });
+	const main = row.createDiv({ cls: "meetings-plus-row-main" });
 	main.createDiv({
-		cls: "calendar-plus-row-title",
+		cls: "meetings-plus-row-title",
 		text: meeting.title,
 	});
 	const metaParts: string[] = [];
@@ -39,22 +39,22 @@ export function renderMeetingRow(opts: MeetingRowOptions): void {
 	}
 	if (metaParts.length > 0) {
 		main.createDiv({
-			cls: "calendar-plus-row-meta",
+			cls: "meetings-plus-row-meta",
 			text: metaParts.join(" · "),
 		});
 	}
 
-	const trail = row.createDiv({ cls: "calendar-plus-row-trail" });
+	const trail = row.createDiv({ cls: "meetings-plus-row-trail" });
 	if (hasNote) {
 		const icon = trail.createSpan({
-			cls: "calendar-plus-row-icon",
+			cls: "meetings-plus-row-icon",
 			attr: { "aria-label": "Note exists" },
 		});
 		setIcon(icon, "file-check");
 	}
 	if (meeting.meetingUrl) {
 		const link = trail.createSpan({
-			cls: "calendar-plus-row-icon",
+			cls: "meetings-plus-row-icon",
 			attr: { "aria-label": "Has meeting link" },
 		});
 		setIcon(link, "video");

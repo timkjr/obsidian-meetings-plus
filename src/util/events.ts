@@ -24,7 +24,7 @@ export class TypedEventBus<Events extends Record<string, unknown>> {
 			try {
 				fn(payload);
 			} catch (e) {
-				console.warn("[Calendar Plus] event listener error", e);
+				console.warn("[Meetings Plus] event listener error", e);
 			}
 		}
 	}

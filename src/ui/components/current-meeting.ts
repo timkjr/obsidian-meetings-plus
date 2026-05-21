@@ -12,13 +12,13 @@ export interface CurrentMeetingOptions {
 
 export function renderCurrentMeeting(opts: CurrentMeetingOptions): void {
 	const { meeting, calendar, hasNote } = opts;
-	const card = opts.parent.createDiv({ cls: "calendar-plus-current" });
+	const card = opts.parent.createDiv({ cls: "meetings-plus-current" });
 
-	const top = card.createDiv({ cls: "calendar-plus-current-top" });
-	const dot = top.createDiv({ cls: "calendar-plus-calendar-dot" });
+	const top = card.createDiv({ cls: "meetings-plus-current-top" });
+	const dot = top.createDiv({ cls: "meetings-plus-calendar-dot" });
 	if (calendar) dot.style.background = calendar.color;
 
-	const info = top.createDiv({ cls: "calendar-plus-current-info" });
+	const info = top.createDiv({ cls: "meetings-plus-current-info" });
 	const startLabel = moment(meeting.start).format("HH:mm");
 	const endLabel = moment(meeting.end).format("HH:mm");
 	const now = Date.now();
@@ -30,28 +30,28 @@ export function renderCurrentMeeting(opts: CurrentMeetingOptions): void {
 					Math.round((meeting.start.getTime() - now) / 60_000)
 				)} min`;
 	info.createDiv({
-		cls: "calendar-plus-current-status",
+		cls: "meetings-plus-current-status",
 		text: status,
 	});
 	info.createDiv({
-		cls: "calendar-plus-current-title",
+		cls: "meetings-plus-current-title",
 		text: meeting.title,
 	});
 	info.createDiv({
-		cls: "calendar-plus-current-time",
+		cls: "meetings-plus-current-time",
 		text: `${startLabel}–${endLabel}`,
 	});
 
-	const actions = card.createDiv({ cls: "calendar-plus-current-actions" });
+	const actions = card.createDiv({ cls: "meetings-plus-current-actions" });
 	const openBtn = actions.createEl("button", {
-		cls: "calendar-plus-current-cta",
+		cls: "meetings-plus-current-cta",
 		text: hasNote ? "Open note" : "Open note",
 	});
 	openBtn.addEventListener("click", () => opts.onOpenNote(meeting));
 
 	if (opts.onOpenLink && meeting.meetingUrl) {
 		const linkBtn = actions.createEl("button", {
-			cls: "calendar-plus-current-link",
+			cls: "meetings-plus-current-link",
 			attr: { "aria-label": "Open meeting link" },
 		});
 		setIcon(linkBtn, "video");

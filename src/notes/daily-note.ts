@@ -2,8 +2,8 @@ import { App, TFile, moment, normalizePath } from "obsidian";
 import { CalendarConfig, Meeting } from "../types";
 import { findExistingNote } from "./duplicate-detector";
 
-const BLOCK_START = "<!-- calendar-plus:start -->";
-const BLOCK_END = "<!-- calendar-plus:end -->";
+const BLOCK_START = "<!-- meetings-plus:start -->";
+const BLOCK_END = "<!-- meetings-plus:end -->";
 
 interface DailyNotesPluginSettings {
 	folder?: string;

@@ -1,11 +1,11 @@
-# Calendar Plus
+# Meetings Plus
 
 Subscribe to your calendars and create pre-filled meeting notes in one click. No drag-and-drop, no Outlook required.
 
-![Calendar Plus sidebar](docs/screenshot-1.png)
-![Calendar Plus meeting note](docs/screenshot-2.png)
-![Calendar Plus settings](docs/screenshot-3.png)
-![Calendar Plus calendar editor](docs/screenshot-4.png)
+![Meetings Plus sidebar](docs/screenshot-1.png)
+![Meetings Plus meeting note](docs/screenshot-2.png)
+![Meetings Plus settings](docs/screenshot-3.png)
+![Meetings Plus calendar editor](docs/screenshot-4.png)
 
 ## What it does
 
@@ -15,32 +15,32 @@ Subscribe to your calendars and create pre-filled meeting notes in one click. No
 - **Already prepared?** The sidebar shows which meetings already have notes; clicking opens the existing one
 - Optional **pre-meeting notifications** with a configurable lead time
 - Optional **daily-note integration** — write today's schedule into your daily note as a managed block
-- **Templater-friendly** — if Templater is installed and enabled, your `<% %>` tokens run after Calendar Plus substitutes its own `{{variables}}`
+- **Templater-friendly** — if Templater is installed and enabled, your `<% %>` tokens run after Meetings Plus substitutes its own `{{variables}}`
 - **Privacy-first**: only network calls are to your calendar URLs, no telemetry, no third-party services
 - **Works on mobile**: pure ICS over HTTPS, no native bindings
 
 ## Why
 
-The existing **Outlook Meeting Notes** plugin requires Outlook and Obsidian to be open simultaneously, and you drag calendar events between them. That's fragile and slow. Calendar Plus reads your calendar directly via ICS, so Outlook doesn't need to be open and nothing needs to be dragged — your meetings are just there in the sidebar.
+The existing **Outlook Meeting Notes** plugin requires Outlook and Obsidian to be open simultaneously, and you drag calendar events between them. That's fragile and slow. Meetings Plus reads your calendar directly via ICS, so Outlook doesn't need to be open and nothing needs to be dragged — your meetings are just there in the sidebar.
 
 ## Installation
 
 ### From the Obsidian community plugins directory (once approved)
 
 1. Open Obsidian → **Settings → Community plugins**
-2. Search for **Calendar Plus**
+2. Search for **Meetings Plus**
 3. Select **Install**, then **Enable**
 
 ### Manual install
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release
-2. Copy them into your vault at `.obsidian/plugins/calendar-plus/`
+2. Copy them into your vault at `.obsidian/plugins/meetings-plus/`
 3. Reload Obsidian and enable the plugin under **Settings → Community plugins**
 
 ## Getting started
 
 1. Get your calendar's ICS URL (see the next section)
-2. Open **Settings → Community plugins → Calendar Plus → Add calendar**
+2. Open **Settings → Community plugins → Meetings Plus → Add calendar**
 3. Paste the URL, give the calendar a name, optionally pick a color and folder
 4. Save — the sidebar opens automatically with today's meetings
 
@@ -64,18 +64,18 @@ The existing **Outlook Meeting Notes** plugin requires Outlook and Obsidian to b
 1. Open Proton Calendar settings → **Share** → **Public link**
 2. Copy the URL
 
-> Calendar Plus also supports HTTP Basic auth: `https://user:pass@host/cal.ics`
+> Meetings Plus also supports HTTP Basic auth: `https://user:pass@host/cal.ics`
 
 ## Usage
 
-- Click the **ribbon icon** to open the sidebar, or run **Calendar Plus: Open dashboard**
+- Click the **ribbon icon** to open the sidebar, or run **Meetings Plus: Open dashboard**
 - **Single click** on a meeting row → create or open the meeting note
 - **Right-click** for a context menu: open meeting link, copy link, or hide for today
 - **Commands** (via the command palette):
-  - Calendar Plus: Open dashboard
-  - Calendar Plus: Refresh all calendars
-  - Calendar Plus: Create note for next meeting
-  - Calendar Plus: Open next meeting link
+  - Meetings Plus: Open dashboard
+  - Meetings Plus: Refresh all calendars
+  - Meetings Plus: Create note for next meeting
+  - Meetings Plus: Open next meeting link
 
 ## Templates
 
@@ -100,7 +100,7 @@ Each calendar has its own editable template. Variables are written as `{{name}}`
 | `{{dedup_key}}` | Internal dedup key (used in frontmatter) |
 | `{{tags}}` | Calendar's tags as YAML list |
 
-**Templater compatibility**: keep your `<% tp.* %>` tokens in the template. Calendar Plus does its `{{ }}` substitution first; Templater runs second if you enable "Run Templater on new notes".
+**Templater compatibility**: keep your `<% tp.* %>` tokens in the template. Meetings Plus does its `{{ }}` substitution first; Templater runs second if you enable "Run Templater on new notes".
 
 ## Settings
 
@@ -127,7 +127,7 @@ Everything is local and offline except the ICS fetches themselves. There are no 
 
 ## Privacy
 
-Calendar Plus only talks to the calendar URLs you configure. It does not collect, log, or transmit calendar contents, attendee names, meeting titles, or fetch URLs anywhere else. There is no analytics layer.
+Meetings Plus only talks to the calendar URLs you configure. It does not collect, log, or transmit calendar contents, attendee names, meeting titles, or fetch URLs anywhere else. There is no analytics layer.
 
 ## Performance notes
 
@@ -135,16 +135,16 @@ Background refresh runs at your configured interval (default 15 min); on each re
 
 ## Plus Plugin Family
 
-Calendar Plus is part of the **Plus Plugin Family** for Obsidian:
+Meetings Plus is part of the **Plus Plugin Family** for Obsidian:
 
 - **[Paste Plus](https://github.com/jabaho9523/obsidian-paste-plus)** — Smart paste: URLs become titled links, images get clean filenames, HTML converts to markdown, YouTube and Twitter links resolve to titles.
 - **[Vault Plus](https://github.com/jabaho9523/obsidian-vault-plus)** — Vault health dashboard: find and fix orphans, broken links, empty notes, duplicates, and more.
 - **[Link Plus](https://github.com/jabaho9523/obsidian-link-plus)** — Unlinked mention scanner: find and convert unlinked mentions vault-wide with one-click or batch operations.
-- **Calendar Plus** — Subscribe to calendars and create pre-filled meeting notes in one click.
+- **Meetings Plus** — Subscribe to calendars and create pre-filled meeting notes in one click.
 
 ## Support
 
-If Calendar Plus saves you time, you can support development here:
+If Meetings Plus saves you time, you can support development here:
 
 <a href="https://www.buymeacoffee.com/jabaho" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 

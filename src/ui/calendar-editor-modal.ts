@@ -17,7 +17,7 @@ export class CalendarEditorModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.addClass("calendar-plus-editor");
+		contentEl.addClass("meetings-plus-editor");
 
 		contentEl.createEl("h2", { text: "Calendar" });
 
@@ -44,7 +44,7 @@ export class CalendarEditorModal extends Modal {
 					.onChange((v) => {
 						this.working.url = v.trim();
 					});
-				t.inputEl.addClass("calendar-plus-input-wide");
+				t.inputEl.addClass("meetings-plus-input-wide");
 			});
 
 		new Setting(contentEl)
@@ -75,7 +75,7 @@ export class CalendarEditorModal extends Modal {
 					.onChange((v) => {
 						this.working.folder = v;
 					});
-				t.inputEl.addClass("calendar-plus-input-wide");
+				t.inputEl.addClass("meetings-plus-input-wide");
 			})
 			.addButton((b) =>
 				b.setButtonText("Browse").onClick(() => {
@@ -94,7 +94,7 @@ export class CalendarEditorModal extends Modal {
 					.onChange((v) => {
 						this.working.titlePattern = v;
 					});
-				t.inputEl.addClass("calendar-plus-input-wide");
+				t.inputEl.addClass("meetings-plus-input-wide");
 			});
 
 		new Setting(contentEl)
@@ -109,7 +109,7 @@ export class CalendarEditorModal extends Modal {
 							.map((s) => s.trim().replace(/^#/, ""))
 							.filter((s) => s.length > 0);
 					});
-				t.inputEl.addClass("calendar-plus-input-wide");
+				t.inputEl.addClass("meetings-plus-input-wide");
 			});
 
 		new Setting(contentEl)
@@ -154,8 +154,8 @@ export class CalendarEditorModal extends Modal {
 					this.working.template = v;
 				});
 				t.inputEl.rows = 18;
-				t.inputEl.addClass("calendar-plus-input-wide");
-				t.inputEl.addClass("calendar-plus-input-mono");
+				t.inputEl.addClass("meetings-plus-input-wide");
+				t.inputEl.addClass("meetings-plus-input-mono");
 			});
 
 		new Setting(contentEl)

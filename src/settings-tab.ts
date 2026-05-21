@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting, setIcon } from "obsidian";
-import CalendarPlusPlugin from "./main";
+import MeetingsPlusPlugin from "./main";
 import { DEFAULT_SETTINGS, makeDefaultCalendar } from "./settings";
 import { CalendarEditorModal } from "./ui/calendar-editor-modal";
 import { generateId } from "./util/id";
@@ -14,10 +14,10 @@ type BooleanKey =
 	| "runTemplaterOnNewNotes"
 	| "openDashboardOnStart";
 
-export class CalendarPlusSettingTab extends PluginSettingTab {
-	plugin: CalendarPlusPlugin;
+export class MeetingsPlusSettingTab extends PluginSettingTab {
+	plugin: MeetingsPlusPlugin;
 
-	constructor(app: App, plugin: CalendarPlusPlugin) {
+	constructor(app: App, plugin: MeetingsPlusPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -59,7 +59,7 @@ export class CalendarPlusSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl).setName("Calendars").setHeading();
 
-		const list = containerEl.createDiv({ cls: "calendar-plus-cal-list" });
+		const list = containerEl.createDiv({ cls: "meetings-plus-cal-list" });
 		this.renderCalendarList(list);
 
 		new Setting(containerEl).addButton((b) =>
@@ -86,29 +86,29 @@ export class CalendarPlusSettingTab extends PluginSettingTab {
 		parent.empty();
 		if (this.plugin.settings.calendars.length === 0) {
 			parent.createDiv({
-				cls: "calendar-plus-empty",
+				cls: "meetings-plus-empty",
 				text: "No calendars yet. Add one below.",
 			});
 			return;
 		}
 
 		for (const cal of this.plugin.settings.calendars) {
-			const row = parent.createDiv({ cls: "calendar-plus-cal-row" });
+			const row = parent.createDiv({ cls: "meetings-plus-cal-row" });
 
-			const dot = row.createDiv({ cls: "calendar-plus-calendar-dot" });
+			const dot = row.createDiv({ cls: "meetings-plus-calendar-dot" });
 			dot.style.background = cal.color;
 
-			const main = row.createDiv({ cls: "calendar-plus-cal-main" });
-			main.createDiv({ cls: "calendar-plus-cal-name", text: cal.name });
+			const main = row.createDiv({ cls: "meetings-plus-cal-main" });
+			main.createDiv({ cls: "meetings-plus-cal-name", text: cal.name });
 			main.createDiv({
-				cls: "calendar-plus-cal-meta",
+				cls: "meetings-plus-cal-meta",
 				text: cal.enabled ? "Enabled" : "Disabled",
 			});
 
-			const actions = row.createDiv({ cls: "calendar-plus-cal-actions" });
+			const actions = row.createDiv({ cls: "meetings-plus-cal-actions" });
 
 			const toggle = actions.createEl("button", {
-				cls: "calendar-plus-icon-btn",
+				cls: "meetings-plus-icon-btn",
 				attr: {
 					"aria-label": cal.enabled ? "Disable" : "Enable",
 				},
@@ -120,7 +120,7 @@ export class CalendarPlusSettingTab extends PluginSettingTab {
 			});
 
 			const edit = actions.createEl("button", {
-				cls: "calendar-plus-icon-btn",
+				cls: "meetings-plus-icon-btn",
 				attr: { "aria-label": "Edit calendar" },
 			});
 			setIcon(edit, "settings-2");
@@ -136,7 +136,7 @@ export class CalendarPlusSettingTab extends PluginSettingTab {
 			});
 
 			const del = actions.createEl("button", {
-				cls: "calendar-plus-icon-btn calendar-plus-icon-danger",
+				cls: "meetings-plus-icon-btn meetings-plus-icon-danger",
 				attr: { "aria-label": "Delete calendar" },
 			});
 			setIcon(del, "trash-2");

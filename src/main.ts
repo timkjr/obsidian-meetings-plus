@@ -2,22 +2,22 @@ import { Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import {
 	PLUGIN_NAME,
 	RIBBON_ICON,
-	VIEW_TYPE_CALENDAR_PLUS,
+	VIEW_TYPE_MEETINGS_PLUS,
 } from "./constants";
 import {
-	CalendarPlusSettings,
+	MeetingsPlusSettings,
 	DEFAULT_SETTINGS,
 } from "./settings";
-import { CalendarPlusSettingTab } from "./settings-tab";
+import { MeetingsPlusSettingTab } from "./settings-tab";
 import { CalendarManager } from "./calendar/manager";
-import { CalendarPlusView } from "./ui/CalendarPlusView";
+import { MeetingsPlusView } from "./ui/MeetingsPlusView";
 import { Meeting } from "./types";
 import { createOrOpenMeetingNote } from "./notes/creator";
 import { updateDailyNote } from "./notes/daily-note";
 import { PreMeetingScheduler } from "./notifications/pre-meeting";
 
-export default class CalendarPlusPlugin extends Plugin {
-	settings!: CalendarPlusSettings;
+export default class MeetingsPlusPlugin extends Plugin {
+	settings!: MeetingsPlusSettings;
 	manager!: CalendarManager;
 	private scheduler!: PreMeetingScheduler;
 
@@ -46,8 +46,8 @@ export default class CalendarPlusPlugin extends Plugin {
 		});
 
 		this.registerView(
-			VIEW_TYPE_CALENDAR_PLUS,
-			(leaf: WorkspaceLeaf) => new CalendarPlusView(leaf, this)
+			VIEW_TYPE_MEETINGS_PLUS,
+			(leaf: WorkspaceLeaf) => new MeetingsPlusView(leaf, this)
 		);
 
 		this.addRibbonIcon(RIBBON_ICON, `Open ${PLUGIN_NAME}`, () => {
@@ -96,7 +96,7 @@ export default class CalendarPlusPlugin extends Plugin {
 			},
 		});
 
-		this.addSettingTab(new CalendarPlusSettingTab(this.app, this));
+		this.addSettingTab(new MeetingsPlusSettingTab(this.app, this));
 
 		this.manager.events.on("refresh:completed", () => {
 			this.scheduler.reschedule();
@@ -117,7 +117,7 @@ export default class CalendarPlusPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		const loaded = (await this.loadData()) as Partial<CalendarPlusSettings> | null;
+		const loaded = (await this.loadData()) as Partial<MeetingsPlusSettings> | null;
 		this.settings = {
 			...DEFAULT_SETTINGS,
 			...(loaded ?? {}),
@@ -133,7 +133,7 @@ export default class CalendarPlusPlugin extends Plugin {
 
 	async activateView(): Promise<void> {
 		const { workspace } = this.app;
-		const existing = workspace.getLeavesOfType(VIEW_TYPE_CALENDAR_PLUS);
+		const existing = workspace.getLeavesOfType(VIEW_TYPE_MEETINGS_PLUS);
 		if (existing.length > 0) {
 			await workspace.revealLeaf(existing[0]!);
 			return;
@@ -141,7 +141,7 @@ export default class CalendarPlusPlugin extends Plugin {
 		const leaf =
 			workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
 		await leaf.setViewState({
-			type: VIEW_TYPE_CALENDAR_PLUS,
+			type: VIEW_TYPE_MEETINGS_PLUS,
 			active: true,
 		});
 		await workspace.revealLeaf(leaf);
@@ -165,7 +165,7 @@ export default class CalendarPlusPlugin extends Plugin {
 			});
 			void this.refreshDailyNote();
 		} catch (e) {
-			console.warn("[Calendar Plus] note creation failed", e);
+			console.warn("[Meetings Plus] note creation failed", e);
 			new Notice(`${PLUGIN_NAME}: failed to create note`);
 		}
 	}
@@ -193,7 +193,7 @@ export default class CalendarPlusPlugin extends Plugin {
 				meetings: this.manager.getAllMeetings(),
 			});
 		} catch (e) {
-			console.warn("[Calendar Plus] daily note update failed", e);
+			console.warn("[Meetings Plus] daily note update failed", e);
 		}
 	}
 }
