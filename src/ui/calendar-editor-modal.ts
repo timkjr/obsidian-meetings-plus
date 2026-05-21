@@ -1,0 +1,186 @@
+import { App, Modal, Setting, TextAreaComponent } from "obsidian";
+import { CalendarConfig } from "../types";
+import { FolderSuggestModal } from "./folder-suggest";
+
+export class CalendarEditorModal extends Modal {
+	private working: CalendarConfig;
+
+	constructor(
+		app: App,
+		initial: CalendarConfig,
+		private readonly onSave: (cal: CalendarConfig) => void | Promise<void>
+	) {
+		super(app);
+		this.working = { ...initial, tags: [...initial.tags] };
+	}
+
+	onOpen(): void {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.addClass("calendar-plus-editor");
+
+		contentEl.createEl("h2", { text: "Calendar" });
+
+		new Setting(contentEl)
+			.setName("Display name")
+			.setDesc("Shown in the sidebar and settings list.")
+			.addText((t) =>
+				t
+					.setPlaceholder("Work")
+					.setValue(this.working.name)
+					.onChange((v) => {
+						this.working.name = v;
+					})
+			);
+
+		new Setting(contentEl)
+			.setName("Calendar feed")
+			.setDesc(
+				"Public calendar link. Basic auth via user:pass@host is supported."
+			)
+			.addText((t) => {
+				t.setPlaceholder("https://outlook.office365.com/.../calendar.ics")
+					.setValue(this.working.url)
+					.onChange((v) => {
+						this.working.url = v.trim();
+					});
+				t.inputEl.addClass("calendar-plus-input-wide");
+			});
+
+		new Setting(contentEl)
+			.setName("Color")
+			.setDesc("Used for the source dot in the sidebar.")
+			.addColorPicker((c) =>
+				c.setValue(this.working.color).onChange((v) => {
+					this.working.color = v;
+				})
+			);
+
+		new Setting(contentEl)
+			.setName("Enabled")
+			.addToggle((t) =>
+				t
+					.setValue(this.working.enabled)
+					.onChange((v) => {
+						this.working.enabled = v;
+					})
+			);
+
+		new Setting(contentEl)
+			.setName("Folder for meeting notes")
+			.setDesc("Notes from this calendar are created here.")
+			.addText((t) => {
+				t.setPlaceholder("Meetings")
+					.setValue(this.working.folder)
+					.onChange((v) => {
+						this.working.folder = v;
+					});
+				t.inputEl.addClass("calendar-plus-input-wide");
+			})
+			.addButton((b) =>
+				b.setButtonText("Browse").onClick(() => {
+					new FolderSuggestModal(this.app, (path) => {
+						this.working.folder = path;
+						this.refresh();
+					}).open();
+				})
+			);
+
+		new Setting(contentEl)
+			.setName("Note title pattern")
+			.addText((t) => {
+				t.setPlaceholder("{{date}} - {{title}}")
+					.setValue(this.working.titlePattern)
+					.onChange((v) => {
+						this.working.titlePattern = v;
+					});
+				t.inputEl.addClass("calendar-plus-input-wide");
+			});
+
+		new Setting(contentEl)
+			.setName("Tags")
+			.setDesc("Comma-separated, without the leading #.")
+			.addText((t) => {
+				t.setPlaceholder("Meeting, work")
+					.setValue(this.working.tags.join(", "))
+					.onChange((v) => {
+						this.working.tags = v
+							.split(",")
+							.map((s) => s.trim().replace(/^#/, ""))
+							.filter((s) => s.length > 0);
+					});
+				t.inputEl.addClass("calendar-plus-input-wide");
+			});
+
+		new Setting(contentEl)
+			.setName("Create standalone notes")
+			.setDesc("One note per meeting in the folder above.")
+			.addToggle((t) =>
+				t
+					.setValue(this.working.createNotes)
+					.onChange((v) => {
+						this.working.createNotes = v;
+					})
+			);
+
+		new Setting(contentEl)
+			.setName("Append to daily note")
+			.setDesc("Also write this calendar's meetings into today's daily note.")
+			.addToggle((t) =>
+				t
+					.setValue(this.working.appendToDailyNote)
+					.onChange((v) => {
+						this.working.appendToDailyNote = v;
+					})
+			);
+
+		new Setting(contentEl)
+			.setName("Exclude all-day events")
+			.addToggle((t) =>
+				t
+					.setValue(this.working.excludeAllDay)
+					.onChange((v) => {
+						this.working.excludeAllDay = v;
+					})
+			);
+
+		new Setting(contentEl)
+			.setName("Template")
+			.setDesc(
+				"Supports {{title}}, {{date}}, {{start:HH:mm}}, {{end:HH:mm}}, {{duration}}, {{location}}, {{meeting_url}}, {{description}}, {{organizer}}, {{attendees}}, {{attendees_list}}, {{attendees_wikilinks}}, {{calendar}}, {{uid}}, {{dedup_key}}, {{tags}}."
+			)
+			.addTextArea((t: TextAreaComponent) => {
+				t.setValue(this.working.template).onChange((v) => {
+					this.working.template = v;
+				});
+				t.inputEl.rows = 18;
+				t.inputEl.addClass("calendar-plus-input-wide");
+				t.inputEl.addClass("calendar-plus-input-mono");
+			});
+
+		new Setting(contentEl)
+			.addButton((b) =>
+				b.setButtonText("Cancel").onClick(() => this.close())
+			)
+			.addButton((b) =>
+				b
+					.setButtonText("Save")
+					.setCta()
+					.onClick(async () => {
+						if (!this.working.name.trim()) {
+							this.working.name = "Untitled calendar";
+						}
+						this.close();
+						await this.onSave(this.working);
+					})
+			);
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
+	}
+
+	private refresh(): void {
+		this.onOpen();
+	}
+}
