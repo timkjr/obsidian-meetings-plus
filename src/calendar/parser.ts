@@ -12,6 +12,76 @@ const GENERIC_URL = /https?:\/\/[^\s"'<>]+/i;
 
 const MAX_RECURRENCE_OCCURRENCES = 500;
 
+/**
+ * Microsoft/Outlook uses proprietary timezone labels that ical.js does not
+ * recognize. The accompanying VTIMEZONE blocks define correct DST rules; we
+ * just rewrite the label so ical.js can register them under an IANA name and
+ * resolve recurrences properly.
+ */
+const MS_TZID_MAP: Record<string, string> = {
+	"W. Europe Standard Time": "Europe/Berlin",
+	"Central Europe Standard Time": "Europe/Budapest",
+	"Central European Standard Time": "Europe/Warsaw",
+	"Romance Standard Time": "Europe/Paris",
+	"GMT Standard Time": "Europe/London",
+	"Greenwich Standard Time": "Atlantic/Reykjavik",
+	"FLE Standard Time": "Europe/Helsinki",
+	"E. Europe Standard Time": "Europe/Bucharest",
+	"GTB Standard Time": "Europe/Athens",
+	"Russian Standard Time": "Europe/Moscow",
+	"Turkey Standard Time": "Europe/Istanbul",
+	"Israel Standard Time": "Asia/Jerusalem",
+	"Egypt Standard Time": "Africa/Cairo",
+	"South Africa Standard Time": "Africa/Johannesburg",
+	"UTC": "UTC",
+	"Pacific Standard Time": "America/Los_Angeles",
+	"Mountain Standard Time": "America/Denver",
+	"Central Standard Time": "America/Chicago",
+	"Eastern Standard Time": "America/New_York",
+	"Atlantic Standard Time": "America/Halifax",
+	"Newfoundland Standard Time": "America/St_Johns",
+	"SA Pacific Standard Time": "America/Bogota",
+	"SA Eastern Standard Time": "America/Cayenne",
+	"Hawaiian Standard Time": "Pacific/Honolulu",
+	"Alaskan Standard Time": "America/Anchorage",
+	"China Standard Time": "Asia/Shanghai",
+	"Tokyo Standard Time": "Asia/Tokyo",
+	"Korea Standard Time": "Asia/Seoul",
+	"India Standard Time": "Asia/Kolkata",
+	"Singapore Standard Time": "Asia/Singapore",
+	"Taipei Standard Time": "Asia/Taipei",
+	"AUS Eastern Standard Time": "Australia/Sydney",
+	"AUS Central Standard Time": "Australia/Darwin",
+	"E. Australia Standard Time": "Australia/Brisbane",
+	"W. Australia Standard Time": "Australia/Perth",
+	"New Zealand Standard Time": "Pacific/Auckland",
+	"Arabian Standard Time": "Asia/Dubai",
+	"Arab Standard Time": "Asia/Riyadh",
+	"Iran Standard Time": "Asia/Tehran",
+};
+
+function rewriteOutlookTzids(ics: string): string {
+	let out = ics;
+	for (const [ms, iana] of Object.entries(MS_TZID_MAP)) {
+		const escaped = ms.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		// VTIMEZONE block header: "TZID:W. Europe Standard Time"
+		out = out.replace(
+			new RegExp(`^TZID:${escaped}\\s*$`, "gm"),
+			`TZID:${iana}`
+		);
+		// Property parameter, quoted or unquoted: TZID="W. Europe Standard Time"
+		out = out.replace(
+			new RegExp(`TZID="${escaped}"`, "g"),
+			`TZID="${iana}"`
+		);
+		out = out.replace(
+			new RegExp(`TZID=${escaped}(?=[:;])`, "g"),
+			`TZID=${iana}`
+		);
+	}
+	return out;
+}
+
 interface AttendeeProperty {
 	name: string;
 	getFirstValue(): unknown;
@@ -54,7 +124,7 @@ export interface ParseOptions {
 export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 	const { calendar, windowStart, windowEnd } = opts;
 
-	const jcal = ICAL.parse(ics);
+	const jcal = ICAL.parse(rewriteOutlookTzids(ics));
 	const root = new ICAL.Component(jcal);
 
 	for (const vtz of root.getAllSubcomponents("vtimezone")) {
@@ -78,6 +148,14 @@ export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 		if (status === "CANCELLED") continue;
 
 		if (event.isRecurring()) {
+			const masterStart = event.startDate.toJSDate();
+			const masterEnd = event.endDate.toJSDate();
+			const masterAllDay = event.startDate.isDate;
+			const masterHours = masterStart.getHours();
+			const masterMinutes = masterStart.getMinutes();
+			const masterDurationMs =
+				masterEnd.getTime() - masterStart.getTime();
+
 			const iter = event.iterator(
 				windowStartTime as unknown as MinimalTime
 			);
@@ -85,18 +163,37 @@ export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 			while (count < MAX_RECURRENCE_OCCURRENCES) {
 				const next = iter.next();
 				if (!next) break;
-				const startDate = next.toJSDate();
-				if (startDate >= windowEnd) break;
-				count++;
-				let details;
+				let start: Date;
+				let end: Date;
 				try {
-					details = event.getOccurrenceDetails(next);
+					const details = event.getOccurrenceDetails(next);
+					start = details.startDate.toJSDate();
+					end = details.endDate.toJSDate();
 				} catch {
+					start = next.toJSDate();
+					end = new Date(start.getTime() + masterDurationMs);
+				}
+				// Safety net: if the recurrence iterator dropped the time-of-day
+				// (returns midnight) but the master event has a real start time,
+				// restore it. Catches unmapped timezone labels.
+				if (
+					!masterAllDay &&
+					start.getHours() === 0 &&
+					start.getMinutes() === 0 &&
+					(masterHours !== 0 || masterMinutes !== 0)
+				) {
+					const fixed = new Date(start);
+					fixed.setHours(masterHours, masterMinutes, 0, 0);
+					const shiftMs = fixed.getTime() - start.getTime();
+					start = fixed;
+					end = new Date(end.getTime() + shiftMs);
+				}
+				if (start >= windowEnd) break;
+				if (end <= windowStart) {
+					count++;
 					continue;
 				}
-				const start = details.startDate.toJSDate();
-				const end = details.endDate.toJSDate();
-				if (end <= windowStart) continue;
+				count++;
 				const meeting = buildMeeting(event, start, end, calendar);
 				if (acceptable(meeting, calendar, seen)) meetings.push(meeting);
 			}
