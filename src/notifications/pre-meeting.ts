@@ -2,6 +2,15 @@ import { App, Notice } from "obsidian";
 import { CalendarConfig, Meeting } from "../types";
 import { findExistingNote } from "../notes/duplicate-detector";
 
+/**
+ * Only schedule notifications for meetings within this horizon. setTimeout
+ * silently overflows past ~24.85 days (32-bit int) and fires immediately,
+ * which was spamming the user with notices for every meeting weeks/months
+ * out. The manager re-runs reschedule() on every fetch (default every 15
+ * min), so anything entering the next 25h gets picked up in time.
+ */
+const SCHEDULE_HORIZON_MS = 25 * 60 * 60 * 1000;
+
 export interface NotificationDeps {
 	app: App;
 	getCalendars: () => CalendarConfig[];
@@ -21,10 +30,12 @@ export class PreMeetingScheduler {
 		if (!this.deps.getEnabled()) return;
 		const leadMs = Math.max(0, this.deps.getLeadMinutes()) * 60_000;
 		const now = Date.now();
+		const horizon = now + SCHEDULE_HORIZON_MS;
 		const meetings = this.deps.getMeetings();
 		for (const meeting of meetings) {
 			const fireAt = meeting.start.getTime() - leadMs;
 			if (fireAt <= now) continue;
+			if (fireAt > horizon) continue;
 			if (findExistingNote(this.deps.app, meeting.dedupKey)) continue;
 			const delay = fireAt - now;
 			const handle = window.setTimeout(() => {

@@ -1,5 +1,6 @@
 import { moment, setIcon } from "obsidian";
 import { CalendarConfig, CalendarStatus } from "../../types";
+import { DatePicker } from "./date-picker";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_DAYS = 180;
@@ -13,6 +14,8 @@ export interface StatusHeaderOptions {
 	focusedDay: string;
 	/** YYYY-MM-DD of today */
 	today: string;
+	/** Set of day keys that have at least one meeting (for picker dots) */
+	daysWithMeetings: Set<string>;
 	onRefresh: () => void;
 	onOpenSettings: () => void;
 	onPickDay: (key: string) => void;
@@ -77,35 +80,21 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 		text: labelFor(focusedDate, opts.today),
 	});
 
-	// Hidden native date input — clicking the label opens its picker.
-	const input = bar.createEl("input", {
-		cls: "meetings-plus-datebar-input",
-		attr: {
-			type: "date",
-			min: opts.today,
-			value: opts.focusedDay,
-			"aria-label": "Jump to date",
-		},
-	});
-	input.addEventListener("change", () => {
-		const v = input.value;
-		if (!v) return;
-		if (v < opts.today) return;
-		opts.onPickDay(v);
-	});
+	let picker: DatePicker | null = null;
 	label.addEventListener("click", () => {
-		const el = input as HTMLInputElement & {
-			showPicker?: () => void;
-		};
-		if (typeof el.showPicker === "function") {
-			try {
-				el.showPicker();
-				return;
-			} catch {
-				/* fall through */
-			}
+		if (picker?.isOpen()) {
+			picker.close();
+			picker = null;
+			return;
 		}
-		el.click();
+		picker = new DatePicker({
+			anchor: label,
+			focusedDay: opts.focusedDay,
+			today: opts.today,
+			daysWithMeetings: opts.daysWithMeetings,
+			onPick: (k) => opts.onPickDay(k),
+		});
+		picker.open();
 	});
 
 	const next = bar.createEl("button", {

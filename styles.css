@@ -388,9 +388,125 @@
 	cursor: default;
 }
 
-/* hidden native date input — the label triggers showPicker() */
-.meetings-plus-datebar-input {
-	display: none;
+/* custom calendar picker (anchored under the date label) */
+.meetings-plus-picker {
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 10px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+	width: 252px;
+	user-select: none;
+	font-size: var(--font-ui-small);
+}
+
+.meetings-plus-picker-floating {
+	position: fixed;
+	left: var(--mp-picker-left, 0);
+	top: var(--mp-picker-top, 0);
+	z-index: 9999;
+}
+
+.meetings-plus-picker-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.meetings-plus-picker-nav {
+	background: transparent;
+	border: none;
+	padding: 4px 6px;
+	cursor: pointer;
+	color: var(--text-muted);
+	border-radius: 4px;
+	display: inline-flex;
+}
+
+.meetings-plus-picker-nav:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.meetings-plus-picker-month {
+	font-weight: 600;
+}
+
+.meetings-plus-picker-daynames {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+	margin-bottom: 4px;
+}
+
+.meetings-plus-picker-dayname {
+	text-align: center;
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	padding: 2px 0;
+}
+
+.meetings-plus-picker-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+}
+
+.meetings-plus-picker-cell {
+	background: transparent;
+	border: 1px solid transparent;
+	padding: 8px 0;
+	border-radius: 4px;
+	cursor: pointer;
+	color: var(--text-normal);
+	font-size: var(--font-ui-small);
+	position: relative;
+	min-height: 32px;
+}
+
+.meetings-plus-picker-cell:hover:not(:disabled) {
+	background: var(--background-modifier-hover);
+}
+
+.meetings-plus-picker-cell:disabled {
+	color: var(--text-faint);
+	cursor: default;
+	opacity: 0.4;
+}
+
+.meetings-plus-picker-other-month {
+	color: var(--text-faint);
+}
+
+.meetings-plus-picker-today {
+	color: var(--interactive-accent);
+	font-weight: 600;
+}
+
+.meetings-plus-picker-focused {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.meetings-plus-picker-focused:hover:not(:disabled) {
+	background: var(--interactive-accent-hover);
+}
+
+.meetings-plus-picker-hasevents::after {
+	content: "";
+	position: absolute;
+	bottom: 3px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: var(--interactive-accent);
+}
+
+.meetings-plus-picker-focused.meetings-plus-picker-hasevents::after {
+	background: var(--text-on-accent);
 }
 
 /* days-shown pill (number of days the agenda renders) */

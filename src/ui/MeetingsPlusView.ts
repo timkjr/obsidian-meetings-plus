@@ -95,6 +95,14 @@ export class MeetingsPlusView extends ItemView {
 		const todayKey = dayKey(today);
 		if (this.focusedDay < todayKey) this.focusedDay = todayKey;
 
+		// daysWithMeetings is computed lazily below; pre-compute now for the
+		// header (the picker needs it even before we render the agenda).
+		const allDaysWithMeetings = new Set(
+			this.plugin.manager
+				.getAllMeetings()
+				.map((m) => dayKey(m.start))
+		);
+
 		renderStatusHeader({
 			parent: root,
 			calendars,
@@ -102,6 +110,7 @@ export class MeetingsPlusView extends ItemView {
 			lookAheadDays: lookAhead,
 			focusedDay: this.focusedDay,
 			today: todayKey,
+			daysWithMeetings: allDaysWithMeetings,
 			onRefresh: () => {
 				void this.plugin.manager.refreshAll();
 			},
