@@ -255,6 +255,7 @@ export class MeetingsPlusView extends ItemView {
 	): void {
 		const day = parent.createDiv({ cls: "meetings-plus-day" });
 		day.setAttribute("data-day", key);
+		if (isToday) day.addClass("meetings-plus-day-today");
 
 		const header = day.createDiv({ cls: "meetings-plus-day-header" });
 		header.createSpan({

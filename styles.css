@@ -435,6 +435,17 @@
 	gap: 2px;
 }
 
+.meetings-plus-day-today {
+	background: var(--background-secondary);
+	border-radius: 6px;
+	padding: 8px 8px 6px;
+	margin: 0 -8px;
+}
+
+.meetings-plus-day-today .meetings-plus-day-label {
+	color: var(--interactive-accent);
+}
+
 .meetings-plus-day-header {
 	display: flex;
 	align-items: baseline;
