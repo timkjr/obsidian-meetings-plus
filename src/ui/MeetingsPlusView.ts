@@ -1,4 +1,4 @@
-import { ItemView, Notice, WorkspaceLeaf, setIcon } from "obsidian";
+import { ItemView, Notice, WorkspaceLeaf, moment, setIcon } from "obsidian";
 import MeetingsPlusPlugin from "../main";
 import {
 	PLUGIN_NAME,
@@ -18,16 +18,15 @@ import { renderStatusHeader } from "./components/status-header";
 import { renderCurrentMeeting } from "./components/current-meeting";
 
 const IMMINENT_WINDOW_MS = 10 * 60 * 1000;
-
-interface CollapsedState {
-	earlier: boolean;
-	tomorrow: boolean;
-}
+const DAY_MS = 24 * 60 * 60 * 1000;
+const EARLIER_TODAY_KEY = "__earlier_today__";
 
 export class MeetingsPlusView extends ItemView {
-	private collapsed: CollapsedState = { earlier: true, tomorrow: true };
+	private collapsed: Record<string, boolean> = {};
+	private focusedDay: string = dayKey(new Date());
 	private unsubRefresh: (() => void) | null = null;
 	private rerenderTimer: number | null = null;
+	private pendingScrollKey: string | null = null;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: MeetingsPlusPlugin) {
 		super(leaf);
@@ -91,14 +90,29 @@ export class MeetingsPlusView extends ItemView {
 			status: this.plugin.manager.getStatus(c.id),
 		}));
 
+		const lookAhead = Math.max(1, this.plugin.settings.lookAheadDays);
+		const now = Date.now();
+		const today = startOfDay(new Date(now));
+		const todayKey = dayKey(today);
+		const maxKey = dayKey(new Date(today.getTime() + (lookAhead - 1) * DAY_MS));
+
+		// Clamp focusedDay if it fell out of the window
+		if (this.focusedDay < todayKey || this.focusedDay > maxKey) {
+			this.focusedDay = todayKey;
+		}
+
 		renderStatusHeader({
 			parent: root,
 			calendars,
 			statuses,
+			lookAheadDays: lookAhead,
+			focusedDay: this.focusedDay,
+			today: todayKey,
 			onRefresh: () => {
 				void this.plugin.manager.refreshAll();
 			},
 			onOpenSettings: () => this.openSettings(),
+			onPickDay: (k) => this.jumpToDay(k),
 		});
 
 		if (calendars.length === 0) {
@@ -115,24 +129,28 @@ export class MeetingsPlusView extends ItemView {
 
 		const meetings = this.visibleMeetings();
 		const calIndex = indexById(calendars);
-		const now = Date.now();
-		const today = startOfDay(new Date(now));
-		const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-		const dayAfter = new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000);
 
-		const todays = meetings.filter(
-			(m) => m.start >= today && m.start < tomorrow
-		);
-		const tomorrows = meetings.filter(
-			(m) => m.start >= tomorrow && m.start < dayAfter
-		);
+		const dayDates: Date[] = [];
+		const dayKeys: string[] = [];
+		for (let i = 0; i < lookAhead; i++) {
+			const d = new Date(today.getTime() + i * DAY_MS);
+			dayDates.push(d);
+			dayKeys.push(dayKey(d));
+		}
 
+		const byDay = new Map<string, Meeting[]>();
+		for (const m of meetings) {
+			const k = dayKey(m.start);
+			if (!byDay.has(k)) byDay.set(k, []);
+			byDay.get(k)!.push(m);
+		}
+
+		const todays = byDay.get(todayKey) ?? [];
 		const current = todays.find(
 			(m) =>
 				m.start.getTime() <= now + IMMINENT_WINDOW_MS &&
 				m.end.getTime() > now
 		);
-
 		if (current) {
 			renderCurrentMeeting({
 				parent: root,
@@ -146,33 +164,72 @@ export class MeetingsPlusView extends ItemView {
 			});
 		}
 
-		const upcoming = todays.filter(
-			(m) => !current || m.dedupKey !== current.dedupKey
-		).filter((m) => m.end.getTime() > now);
+		const upcomingToday = todays.filter(
+			(m) =>
+				m.end.getTime() > now &&
+				(!current || m.dedupKey !== current.dedupKey)
+		);
+		this.renderDaySection(
+			root,
+			todayKey,
+			todayKey,
+			false,
+			"Today",
+			upcomingToday,
+			calIndex
+		);
+
 		const earlier = todays.filter((m) => m.end.getTime() <= now);
+		if (earlier.length > 0) {
+			this.renderDaySection(
+				root,
+				null,
+				EARLIER_TODAY_KEY,
+				true,
+				"Earlier today",
+				earlier,
+				calIndex
+			);
+		}
 
-		this.renderSection(root, "Up next", upcoming, calIndex, false, null);
-		this.renderSection(
-			root,
-			"Earlier today",
-			earlier,
-			calIndex,
-			true,
-			"earlier"
-		);
-		this.renderSection(
-			root,
-			"Tomorrow",
-			tomorrows,
-			calIndex,
-			true,
-			"tomorrow"
-		);
+		for (let i = 1; i < dayKeys.length; i++) {
+			const k = dayKeys[i]!;
+			const date = dayDates[i]!;
+			const label = dayLabel(date, false, i === 1);
+			const dayMeetings = byDay.get(k) ?? [];
+			this.renderDaySection(
+				root,
+				k,
+				k,
+				true,
+				label,
+				dayMeetings,
+				calIndex
+			);
+		}
 
-		if (todays.length === 0 && tomorrows.length === 0) {
-			root.createDiv({
-				cls: "meetings-plus-empty",
-				text: "Nothing scheduled.",
+		if (todays.length === 0) {
+			const anyFuture = dayKeys
+				.slice(1)
+				.some((k) => (byDay.get(k) ?? []).length > 0);
+			if (!anyFuture) {
+				root.createDiv({
+					cls: "meetings-plus-empty",
+					text: "Nothing scheduled.",
+				});
+			}
+		}
+
+		if (this.pendingScrollKey) {
+			const target = this.pendingScrollKey;
+			this.pendingScrollKey = null;
+			requestAnimationFrame(() => {
+				const el = this.contentEl.querySelector(
+					`[data-day="${target}"]`
+				);
+				if (el instanceof HTMLElement) {
+					el.scrollIntoView({ behavior: "smooth", block: "start" });
+				}
 			});
 		}
 	}
@@ -205,18 +262,23 @@ export class MeetingsPlusView extends ItemView {
 		}
 	}
 
-	private renderSection(
+	private renderDaySection(
 		parent: HTMLElement,
+		domDayKey: string | null,
+		collapseKey: string,
+		defaultCollapsed: boolean,
 		title: string,
 		meetings: Meeting[],
-		calIndex: Map<string, CalendarConfig>,
-		collapsible: boolean,
-		key: "earlier" | "tomorrow" | null
+		calIndex: Map<string, CalendarConfig>
 	): void {
-		if (meetings.length === 0) return;
-		const section = parent.createDiv({ cls: "meetings-plus-section" });
-		const isCollapsed = collapsible && key ? this.collapsed[key] : false;
+		const isCollapsed = this.collapsed[collapseKey] ?? defaultCollapsed;
+
+		const section = parent.createDiv({
+			cls: "meetings-plus-section meetings-plus-day-section",
+		});
+		if (domDayKey) section.setAttribute("data-day", domDayKey);
 		if (isCollapsed) section.addClass("meetings-plus-collapsed");
+		if (meetings.length === 0) section.addClass("meetings-plus-day-empty");
 
 		const header = section.createDiv({
 			cls: "meetings-plus-section-header",
@@ -231,14 +293,10 @@ export class MeetingsPlusView extends ItemView {
 			cls: "meetings-plus-section-count",
 			text: String(meetings.length),
 		});
-		if (collapsible && key) {
-			header.addEventListener("click", () => {
-				this.collapsed[key] = !this.collapsed[key];
-				this.render();
-			});
-		} else {
-			chevron.addClass("meetings-plus-chevron-hidden");
-		}
+		header.addEventListener("click", () => {
+			this.collapsed[collapseKey] = !isCollapsed;
+			this.render();
+		});
 
 		const body = section.createDiv({ cls: "meetings-plus-section-body" });
 		for (const meeting of meetings) {
@@ -251,6 +309,13 @@ export class MeetingsPlusView extends ItemView {
 				onContextMenu: (m, evt) => this.showContextMenu(m, evt),
 			});
 		}
+	}
+
+	private jumpToDay(k: string): void {
+		this.focusedDay = k;
+		this.collapsed[k] = false;
+		this.pendingScrollKey = k;
+		this.render();
 	}
 
 	private hasNote(meeting: Meeting): boolean {
@@ -339,3 +404,15 @@ function endOfDay(d: Date): Date {
 	return x;
 }
 
+export function dayKey(d: Date): string {
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, "0");
+	const dd = String(d.getDate()).padStart(2, "0");
+	return `${y}-${m}-${dd}`;
+}
+
+function dayLabel(d: Date, isToday: boolean, isTomorrow: boolean): string {
+	if (isToday) return "Today";
+	if (isTomorrow) return "Tomorrow";
+	return moment(d).format("ddd, MMM D");
+}

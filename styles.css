@@ -8,6 +8,12 @@
 
 .meetings-plus-status {
 	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.meetings-plus-status-top {
+	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
@@ -333,6 +339,72 @@
 .meetings-plus-cal-actions {
 	display: flex;
 	gap: 2px;
+}
+
+/* date navigator strip */
+.meetings-plus-datebar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 0;
+	border-top: 1px solid var(--background-modifier-border);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.meetings-plus-datebar-label {
+	flex: 1;
+	background: transparent;
+	border: none;
+	color: var(--text-normal);
+	font-weight: 500;
+	font-size: var(--font-ui-small);
+	padding: 6px 8px;
+	border-radius: 4px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.meetings-plus-datebar-label:hover {
+	background: var(--background-modifier-hover);
+}
+
+.meetings-plus-datebar-today {
+	background: transparent;
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding: 4px 8px;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.meetings-plus-datebar-today:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.meetings-plus-icon-btn:disabled {
+	opacity: 0.3;
+	cursor: default;
+}
+
+/* visually hidden native date input — the label triggers showPicker() */
+.meetings-plus-datebar-input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* per-day section modifiers */
+.meetings-plus-day-empty .meetings-plus-section-title,
+.meetings-plus-day-empty .meetings-plus-section-count {
+	color: var(--text-faint);
 }
 
 /* hide frontmatter properties on meeting notes (opt-in via cssclasses) */

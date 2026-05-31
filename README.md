@@ -8,6 +8,7 @@ Subscribe to your calendars and create pre-filled meeting notes in one click. No
 
 - Subscribe to one or more **ICS calendar feeds** (Outlook, Google, iCloud, Proton, Fastmail — any standards-compliant ICS source)
 - Today's meetings appear in a sidebar, sorted by time
+- **Multi-day agenda**: scroll through the look-ahead window day by day, or jump to any date with the built-in date picker
 - **One click on a meeting → fully pre-filled meeting note** in your configured folder, with attendees, time, location, agenda — ready to take notes
 - **Already prepared?** The sidebar shows which meetings already have notes; clicking opens the existing one
 - Optional **pre-meeting notifications** with a configurable lead time
