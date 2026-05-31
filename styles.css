@@ -388,23 +388,115 @@
 	cursor: default;
 }
 
-/* visually hidden native date input — the label triggers showPicker() */
+/* hidden native date input — the label triggers showPicker() */
 .meetings-plus-datebar-input {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border: 0;
+	display: none;
 }
 
-/* per-day section modifiers */
-.meetings-plus-day-empty .meetings-plus-section-title,
-.meetings-plus-day-empty .meetings-plus-section-count {
+/* days-shown pill (number of days the agenda renders) */
+.meetings-plus-datebar-days {
+	background: transparent;
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding: 4px 8px;
+	border-radius: 999px;
+	cursor: pointer;
+	min-width: 36px;
+	text-align: center;
+}
+
+.meetings-plus-datebar-days:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.meetings-plus-datebar-days-input {
+	width: 48px;
+	padding: 4px 6px;
+	border-radius: 999px;
+	border: 1px solid var(--interactive-accent);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-smaller);
+	text-align: center;
+}
+
+/* agenda — flat per-day */
+.meetings-plus-agenda {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.meetings-plus-day {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.meetings-plus-day-header {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	padding: 0 2px 4px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.meetings-plus-day-label {
+	font-weight: 600;
+	font-size: var(--font-ui-small);
+	color: var(--text-normal);
+}
+
+.meetings-plus-day-body {
+	display: flex;
+	flex-direction: column;
+}
+
+.meetings-plus-day-empty-inline {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding: 6px 2px 0;
+	font-style: italic;
+}
+
+.meetings-plus-empty-run {
 	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	padding: 6px 2px;
+	text-align: center;
+	font-style: italic;
+}
+
+/* "Earlier today" mini-collapsible inside the today section */
+.meetings-plus-earlier-section {
+	display: flex;
+	flex-direction: column;
+	margin-top: 6px;
+}
+
+.meetings-plus-earlier-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 2px;
+	cursor: pointer;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	user-select: none;
+}
+
+.meetings-plus-earlier-header:hover {
+	color: var(--text-normal);
+}
+
+.meetings-plus-earlier-section.meetings-plus-collapsed .meetings-plus-chevron {
+	transform: rotate(-90deg);
+}
+
+.meetings-plus-earlier-section.meetings-plus-collapsed .meetings-plus-earlier-body {
+	display: none;
 }
 
 /* hide frontmatter properties on meeting notes (opt-in via cssclasses) */

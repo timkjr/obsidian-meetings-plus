@@ -2,6 +2,7 @@ import { moment, setIcon } from "obsidian";
 import { CalendarConfig, CalendarStatus } from "../../types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_DAYS = 180;
 
 export interface StatusHeaderOptions {
 	parent: HTMLElement;
@@ -15,6 +16,7 @@ export interface StatusHeaderOptions {
 	onRefresh: () => void;
 	onOpenSettings: () => void;
 	onPickDay: (key: string) => void;
+	onChangeDays: (n: number) => void;
 }
 
 export function renderStatusHeader(opts: StatusHeaderOptions): void {
@@ -52,12 +54,8 @@ export function renderStatusHeader(opts: StatusHeaderOptions): void {
 function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 	const todayDate = dateFromKey(opts.today);
 	const focusedDate = dateFromKey(opts.focusedDay);
-	const maxOffset = Math.max(0, opts.lookAheadDays - 1);
 	const focusedOffset = Math.round(
 		(focusedDate.getTime() - todayDate.getTime()) / DAY_MS
-	);
-	const maxKey = keyFromDate(
-		new Date(todayDate.getTime() + maxOffset * DAY_MS)
 	);
 
 	const bar = parent.createDiv({ cls: "meetings-plus-datebar" });
@@ -79,12 +77,12 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 		text: labelFor(focusedDate, opts.today),
 	});
 
+	// Hidden native date input — clicking the label opens its picker.
 	const input = bar.createEl("input", {
 		cls: "meetings-plus-datebar-input",
 		attr: {
 			type: "date",
 			min: opts.today,
-			max: maxKey,
 			value: opts.focusedDay,
 			"aria-label": "Jump to date",
 		},
@@ -92,7 +90,7 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 	input.addEventListener("change", () => {
 		const v = input.value;
 		if (!v) return;
-		if (v < opts.today || v > maxKey) return;
+		if (v < opts.today) return;
 		opts.onPickDay(v);
 	});
 	label.addEventListener("click", () => {
@@ -100,10 +98,14 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 			showPicker?: () => void;
 		};
 		if (typeof el.showPicker === "function") {
-			el.showPicker();
-		} else {
-			el.click();
+			try {
+				el.showPicker();
+				return;
+			} catch {
+				/* fall through */
+			}
 		}
+		el.click();
 	});
 
 	const next = bar.createEl("button", {
@@ -111,12 +113,12 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 		attr: { "aria-label": "Next day" },
 	});
 	setIcon(next, "chevron-right");
-	if (focusedOffset >= maxOffset) next.setAttribute("disabled", "true");
 	next.addEventListener("click", () => {
-		if (focusedOffset >= maxOffset) return;
 		const np = new Date(focusedDate.getTime() + DAY_MS);
 		opts.onPickDay(keyFromDate(np));
 	});
+
+	renderDaysPill(bar, opts);
 
 	if (opts.focusedDay !== opts.today) {
 		const todayBtn = bar.createEl("button", {
@@ -125,6 +127,57 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 		});
 		todayBtn.addEventListener("click", () => opts.onPickDay(opts.today));
 	}
+}
+
+function renderDaysPill(bar: HTMLElement, opts: StatusHeaderOptions): void {
+	const pill = bar.createEl("button", {
+		cls: "meetings-plus-datebar-days",
+		text: `${opts.lookAheadDays}d`,
+		attr: { "aria-label": "Days shown" },
+	});
+	pill.addEventListener("click", () => {
+		const input = bar.createEl("input", {
+			cls: "meetings-plus-datebar-days-input",
+			attr: {
+				type: "number",
+				min: "1",
+				max: String(MAX_DAYS),
+				value: String(opts.lookAheadDays),
+				"aria-label": "Days to show",
+			},
+		});
+		pill.replaceWith(input);
+		input.focus();
+		input.select();
+
+		let committed = false;
+		const commit = () => {
+			if (committed) return;
+			committed = true;
+			const n = parseInt(input.value, 10);
+			if (Number.isFinite(n) && n >= 1 && n <= MAX_DAYS) {
+				if (n !== opts.lookAheadDays) opts.onChangeDays(n);
+				else input.replaceWith(pill);
+			} else {
+				input.replaceWith(pill);
+			}
+		};
+		const cancel = () => {
+			if (committed) return;
+			committed = true;
+			input.replaceWith(pill);
+		};
+		input.addEventListener("blur", commit);
+		input.addEventListener("keydown", (evt) => {
+			if (evt.key === "Enter") {
+				evt.preventDefault();
+				commit();
+			} else if (evt.key === "Escape") {
+				evt.preventDefault();
+				cancel();
+			}
+		});
+	});
 }
 
 function labelFor(d: Date, todayKey: string): string {
