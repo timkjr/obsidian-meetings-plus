@@ -15,7 +15,8 @@ export async function fetchICS(
 	rawUrl: string,
 	opts: FetchOptions = {}
 ): Promise<FetchResult> {
-	const { url, headers } = extractAuth(rawUrl);
+	const normalized = normalizeWebcal(rawUrl);
+	const { url, headers } = extractAuth(normalized);
 	const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
 	const result = await withTimeout(
@@ -39,6 +40,22 @@ export async function fetchICS(
 		throw new Error("Response is not a valid ICS feed");
 	}
 	return { body, status: result.status };
+}
+
+/**
+ * iCloud (and many other calendar apps) hand out `webcal://` URLs that are
+ * meant to deep-link into a calendar client. Semantically they're just HTTPS
+ * resources, so rewrite the scheme so `requestUrl()` accepts them.
+ */
+function normalizeWebcal(rawUrl: string): string {
+	const trimmed = rawUrl.trim();
+	if (/^webcals:\/\//i.test(trimmed)) {
+		return trimmed.replace(/^webcals:\/\//i, "https://");
+	}
+	if (/^webcal:\/\//i.test(trimmed)) {
+		return trimmed.replace(/^webcal:\/\//i, "https://");
+	}
+	return trimmed;
 }
 
 interface AuthExtraction {
