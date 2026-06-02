@@ -36,10 +36,10 @@ export class CalendarEditorModal extends Modal {
 		new Setting(contentEl)
 			.setName("Calendar feed")
 			.setDesc(
-				"Public calendar link. Basic auth via user:pass@host is supported."
+				"Paste the public link to your calendar. Look for share, publish, or secret address in your calendar app."
 			)
 			.addText((t) => {
-				t.setPlaceholder("https://outlook.office365.com/.../calendar.ics")
+				t.setPlaceholder("https://example.com/calendar.ics")
 					.setValue(this.working.url)
 					.onChange((v) => {
 						this.working.url = v.trim();
