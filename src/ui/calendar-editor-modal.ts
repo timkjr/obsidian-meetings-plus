@@ -1,5 +1,5 @@
 import { App, Modal, Setting, TextAreaComponent } from "obsidian";
-import { CalendarConfig } from "../types";
+import { CalendarConfig, NoteDestination } from "../types";
 import { FolderSuggestModal } from "./folder-suggest";
 
 export class CalendarEditorModal extends Modal {
@@ -113,19 +113,25 @@ export class CalendarEditorModal extends Modal {
 			});
 
 		new Setting(contentEl)
-			.setName("Create standalone notes")
-			.setDesc("One note per meeting in the folder above.")
-			.addToggle((t) =>
-				t
-					.setValue(this.working.createNotes)
-					.onChange((v) => {
-						this.working.createNotes = v;
-					})
-			);
+			.setName("Note destination")
+			.setDesc(
+				"Where clicking a meeting writes its note. Standalone file goes into the folder above; daily note section appends inside today's daily note."
+			)
+			.addDropdown((d) => {
+				d.addOption("file", "Standalone file");
+				d.addOption("daily-note", "Today's daily note (as section)");
+				d.addOption("none", "Don't create notes");
+				d.setValue(this.working.noteDestination);
+				d.onChange((v) => {
+					this.working.noteDestination = v as NoteDestination;
+				});
+			});
 
 		new Setting(contentEl)
-			.setName("Append to daily note")
-			.setDesc("Also write this calendar's meetings into today's daily note.")
+			.setName("Show meeting list in daily note")
+			.setDesc(
+				"Also maintain a managed list of today's meetings inside the daily note. Independent of note destination above."
+			)
 			.addToggle((t) =>
 				t
 					.setValue(this.working.appendToDailyNote)

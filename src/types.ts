@@ -1,5 +1,13 @@
 import { TFile } from "obsidian";
 
+/**
+ * Where clicking a meeting writes its note.
+ * - "file": separate .md file in the calendar's configured folder (default)
+ * - "daily-note": appended as a section inside today's daily note
+ * - "none": disabled — clicking just opens the meeting link if there is one
+ */
+export type NoteDestination = "file" | "daily-note" | "none";
+
 export interface CalendarConfig {
 	/** Stable internal ID, generated when calendar is added */
 	id: string;
@@ -19,9 +27,9 @@ export interface CalendarConfig {
 	titlePattern: string;
 	/** Tags to add to frontmatter of every note from this calendar */
 	tags: string[];
-	/** Create a standalone note per meeting */
-	createNotes: boolean;
-	/** Also append meetings from this calendar to today's daily note */
+	/** Where new meeting notes go */
+	noteDestination: NoteDestination;
+	/** Also maintain a "## Today's meetings" index list inside the daily note */
 	appendToDailyNote: boolean;
 	/** Filter out all-day events */
 	excludeAllDay: boolean;

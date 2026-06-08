@@ -90,7 +90,7 @@ function replaceBlock(content: string, block: string): string {
 	return `${content}${sep}\n${block}\n`;
 }
 
-async function ensureDailyNote(app: App): Promise<TFile | null> {
+export async function ensureDailyNote(app: App): Promise<TFile | null> {
 	const settings = getDailyNotesSettings(app);
 	const format = settings?.format || "YYYY-MM-DD";
 	const folder = (settings?.folder ?? "").trim();

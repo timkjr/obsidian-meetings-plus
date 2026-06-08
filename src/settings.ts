@@ -88,7 +88,7 @@ export function makeDefaultCalendar(
 		template: DEFAULT_TEMPLATE,
 		titlePattern: DEFAULT_TITLE_PATTERN,
 		tags: [],
-		createNotes: true,
+		noteDestination: "file",
 		appendToDailyNote: false,
 		excludeAllDay: true,
 		...overrides,

@@ -143,7 +143,7 @@ export default class MeetingsPlusPlugin extends Plugin {
 			...DEFAULT_SETTINGS,
 			...(loaded ?? {}),
 			cache: { ...(loaded?.cache ?? {}) },
-			calendars: loaded?.calendars ?? [],
+			calendars: (loaded?.calendars ?? []).map(migrateCalendar),
 			skippedToday: loaded?.skippedToday ?? [],
 		};
 	}
@@ -217,4 +217,44 @@ export default class MeetingsPlusPlugin extends Plugin {
 			console.warn("[Meetings Plus] daily note update failed", e);
 		}
 	}
+}
+
+/**
+ * Bring older calendar configs forward when the schema changes between
+ * releases. Returning a new object keeps the input immutable.
+ */
+function migrateCalendar(c: unknown): import("./types").CalendarConfig {
+	const obj = (c ?? {}) as Record<string, unknown>;
+	const legacyCreateNotes = obj["createNotes"];
+	const noteDestination = obj["noteDestination"];
+	let destination: import("./types").NoteDestination;
+	if (
+		noteDestination === "file" ||
+		noteDestination === "daily-note" ||
+		noteDestination === "none"
+	) {
+		destination = noteDestination;
+	} else if (legacyCreateNotes === false) {
+		destination = "none";
+	} else {
+		destination = "file";
+	}
+	return {
+		id: pickString(obj["id"], ""),
+		name: pickString(obj["name"], ""),
+		url: pickString(obj["url"], ""),
+		color: pickString(obj["color"], "#4a90e2"),
+		enabled: obj["enabled"] !== false,
+		folder: pickString(obj["folder"], ""),
+		template: pickString(obj["template"], ""),
+		titlePattern: pickString(obj["titlePattern"], "{{date}} - {{title}}"),
+		tags: Array.isArray(obj["tags"]) ? (obj["tags"] as string[]) : [],
+		noteDestination: destination,
+		appendToDailyNote: obj["appendToDailyNote"] === true,
+		excludeAllDay: obj["excludeAllDay"] !== false,
+	};
+}
+
+function pickString(value: unknown, fallback: string): string {
+	return typeof value === "string" ? value : fallback;
 }

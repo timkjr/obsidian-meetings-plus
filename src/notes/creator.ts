@@ -3,6 +3,7 @@ import { CalendarConfig, Meeting } from "../types";
 import { renderTemplate, sanitizeFilename } from "./template";
 import { findExistingNote } from "./duplicate-detector";
 import { runTemplaterIfAvailable } from "../integrations/templater";
+import { ensureDailyNote } from "./daily-note";
 
 export interface CreateOptions {
 	app: App;
@@ -17,19 +18,29 @@ export async function createOrOpenMeetingNote(
 ): Promise<TFile | null> {
 	const { app, meeting, calendar } = opts;
 
+	// Existing standalone note → just open it, regardless of destination.
 	const existing = findExistingNote(app, meeting.dedupKey);
 	if (existing) {
 		await openFile(app, existing, opts.openInNewPane);
 		return existing;
 	}
 
-	if (!calendar.createNotes) {
-		new Notice(
-			`Meetings Plus: standalone notes disabled for "${calendar.name}"`
-		);
-		return null;
+	switch (calendar.noteDestination) {
+		case "none":
+			new Notice(
+				`Meetings Plus: note creation disabled for "${calendar.name}"`
+			);
+			return null;
+		case "daily-note":
+			return appendToDailyNoteSection(opts);
+		case "file":
+		default:
+			return createStandaloneFile(opts);
 	}
+}
 
+async function createStandaloneFile(opts: CreateOptions): Promise<TFile | null> {
+	const { app, meeting, calendar } = opts;
 	const folder = (calendar.folder || "").trim();
 	if (folder) await ensureFolder(app, folder);
 
@@ -38,10 +49,7 @@ export async function createOrOpenMeetingNote(
 		calendar,
 	});
 	const baseName = sanitizeFilename(titleBody) || "Untitled meeting";
-	const path = await uniquePath(
-		app,
-		joinPath(folder, `${baseName}.md`)
-	);
+	const path = await uniquePath(app, joinPath(folder, `${baseName}.md`));
 
 	const body = renderTemplate(calendar.template, { meeting, calendar });
 	const file = await app.vault.create(path, body);
@@ -50,12 +58,86 @@ export async function createOrOpenMeetingNote(
 		try {
 			await runTemplaterIfAvailable(app, file);
 		} catch (e) {
-			console.warn("[Meetings Plus] Templater post-processing failed", e);
+			console.warn(
+				"[Meetings Plus] Templater post-processing failed",
+				e
+			);
 		}
 	}
 
 	await openFile(app, file, opts.openInNewPane);
 	return file;
+}
+
+const SECTION_MARKER_RE = (key: string): RegExp =>
+	new RegExp(
+		`<!--\\s*mp:section\\s+dedup=${escapeRegex(key)}\\s*-->[\\s\\S]*?<!--\\s*mp:section/end\\s+dedup=${escapeRegex(key)}\\s*-->`,
+		"m"
+	);
+
+async function appendToDailyNoteSection(
+	opts: CreateOptions
+): Promise<TFile | null> {
+	const { app, meeting, calendar } = opts;
+	const file = await ensureDailyNote(app);
+	if (!file) {
+		new Notice(
+			"Could not create or open today's daily note. Check the daily notes core plugin settings."
+		);
+		return null;
+	}
+
+	const body = stripFrontmatter(
+		renderTemplate(calendar.template, { meeting, calendar })
+	).trim();
+	const sectionBlock = buildSection(meeting.dedupKey, body);
+
+	const original = await app.vault.read(file);
+	const re = SECTION_MARKER_RE(meeting.dedupKey);
+	let next: string;
+	if (re.test(original)) {
+		next = original.replace(re, sectionBlock);
+	} else {
+		const sep =
+			original.length === 0 || original.endsWith("\n") ? "" : "\n";
+		next = `${original}${sep}\n${sectionBlock}\n`;
+	}
+	if (next !== original) {
+		await app.vault.modify(file, next);
+	}
+
+	if (opts.runTemplater) {
+		try {
+			await runTemplaterIfAvailable(app, file);
+		} catch (e) {
+			console.warn(
+				"[Meetings Plus] Templater post-processing failed",
+				e
+			);
+		}
+	}
+
+	await openFile(app, file, opts.openInNewPane);
+	return file;
+}
+
+function buildSection(dedupKey: string, body: string): string {
+	return [
+		`<!-- mp:section dedup=${dedupKey} -->`,
+		body,
+		`<!-- mp:section/end dedup=${dedupKey} -->`,
+	].join("\n");
+}
+
+function stripFrontmatter(text: string): string {
+	if (!text.startsWith("---")) return text;
+	const end = text.indexOf("\n---", 3);
+	if (end < 0) return text;
+	return text.slice(end + 4).replace(/^\n+/, "");
+}
+
+function escapeRegex(s: string): string {
+	return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 async function ensureFolder(app: App, folder: string): Promise<void> {
