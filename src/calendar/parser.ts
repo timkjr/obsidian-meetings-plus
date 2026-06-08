@@ -112,6 +112,7 @@ interface MinimalEvent {
 	getOccurrenceDetails(time: MinimalTime): {
 		startDate: MinimalTime;
 		endDate: MinimalTime;
+		item: { component: MinimalComponent };
 	};
 }
 
@@ -140,7 +141,10 @@ export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 
 	const meetings: Meeting[] = [];
 	const seen = new Set<string>();
-	const windowStartTime = ICAL.Time.fromJSDate(windowStart, false);
+	// Pass the seed in UTC. Local-time seeds confuse the iterator when the
+	// event's TZID differs from the user's TZ (caused yesterday's recurring
+	// instances to leak into today after midnight, issue #3).
+	const windowStartTime = ICAL.Time.fromJSDate(windowStart, true);
 
 	for (const vevent of root.getAllSubcomponents("vevent")) {
 		const event = new ICAL.Event(vevent) as unknown as MinimalEvent;
@@ -165,13 +169,28 @@ export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 				if (!next) break;
 				let start: Date;
 				let end: Date;
+				let overrideCancelled = false;
 				try {
 					const details = event.getOccurrenceDetails(next);
 					start = details.startDate.toJSDate();
 					end = details.endDate.toJSDate();
+					// Single-occurrence cancellation: the override VEVENT has
+					// its own STATUS:CANCELLED. ical.js still iterates the slot,
+					// so we have to check the override item ourselves.
+					const overrideStatus =
+						details.item.component.getFirstPropertyValue<string>(
+							"status"
+						);
+					if (overrideStatus === "CANCELLED") {
+						overrideCancelled = true;
+					}
 				} catch {
 					start = next.toJSDate();
 					end = new Date(start.getTime() + masterDurationMs);
+				}
+				if (overrideCancelled) {
+					count++;
+					continue;
 				}
 				// Safety net: if the recurrence iterator dropped the time-of-day
 				// (returns midnight) but the master event has a real start time,

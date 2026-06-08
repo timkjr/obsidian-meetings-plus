@@ -96,6 +96,27 @@ export default class MeetingsPlusPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "update-daily-note",
+			name: "Update today's daily note now",
+			callback: () => {
+				void (async () => {
+					try {
+						await this.refreshDailyNote();
+						new Notice(`${PLUGIN_NAME}: daily note updated`);
+					} catch (e) {
+						console.warn(
+							"[Meetings Plus] manual daily note update failed",
+							e
+						);
+						new Notice(
+							`${PLUGIN_NAME}: daily note update failed — check console`
+						);
+					}
+				})();
+			},
+		});
+
 		this.addSettingTab(new MeetingsPlusSettingTab(this.app, this));
 
 		this.manager.events.on("refresh:completed", () => {

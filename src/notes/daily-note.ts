@@ -25,20 +25,32 @@ export interface UpdateOptions {
 export async function updateDailyNote(opts: UpdateOptions): Promise<void> {
 	const { app, calendars, meetings } = opts;
 
-	const enabledCalendarIds = new Set(
-		calendars.filter((c) => c.appendToDailyNote).map((c) => c.id)
+	const eligibleCalendarIds = new Set(
+		calendars
+			.filter((c) => c.enabled && c.appendToDailyNote)
+			.map((c) => c.id)
 	);
-	if (enabledCalendarIds.size === 0) return;
+	if (eligibleCalendarIds.size === 0) {
+		console.warn(
+			"[Meetings Plus] Daily note: no calendar has 'Append to daily note' enabled"
+		);
+		return;
+	}
 
 	const today = startOfDay(new Date());
 	const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 	const todays = meetings
-		.filter((m) => enabledCalendarIds.has(m.calendarId))
+		.filter((m) => eligibleCalendarIds.has(m.calendarId))
 		.filter((m) => m.start >= today && m.start < tomorrow)
 		.sort((a, b) => a.start.getTime() - b.start.getTime());
 
 	const file = await ensureDailyNote(app);
-	if (!file) return;
+	if (!file) {
+		console.warn(
+			"[Meetings Plus] Daily note: could not find or create today's daily note"
+		);
+		return;
+	}
 
 	const original = await app.vault.read(file);
 	const next = replaceBlock(original, buildBlock(app, todays));

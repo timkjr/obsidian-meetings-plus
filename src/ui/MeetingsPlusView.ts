@@ -97,10 +97,9 @@ export class MeetingsPlusView extends ItemView {
 
 		// daysWithMeetings is computed lazily below; pre-compute now for the
 		// header (the picker needs it even before we render the agenda).
+		// Honors disabled-calendar and skip-today filters via visibleMeetings().
 		const allDaysWithMeetings = new Set(
-			this.plugin.manager
-				.getAllMeetings()
-				.map((m) => dayKey(m.start))
+			this.visibleMeetings().map((m) => dayKey(m.start))
 		);
 
 		renderStatusHeader({
@@ -396,8 +395,14 @@ export class MeetingsPlusView extends ItemView {
 				.filter((s) => s.until > now)
 				.map((s) => s.key)
 		);
+		const enabledIds = new Set(
+			this.plugin.settings.calendars
+				.filter((c) => c.enabled)
+				.map((c) => c.id)
+		);
 		return this.plugin.manager
 			.getAllMeetings()
+			.filter((m) => enabledIds.has(m.calendarId))
 			.filter((m) => !skipped.has(m.dedupKey));
 	}
 
