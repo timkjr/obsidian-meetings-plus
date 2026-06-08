@@ -35,9 +35,15 @@ export class DatePicker {
 		else this.open();
 	}
 
+	private get doc(): Document {
+		return this.opts.anchor.ownerDocument;
+	}
+
 	open(): void {
 		if (this.el) return;
-		const popup = document.body.createDiv({ cls: "meetings-plus-picker" });
+		const popup = this.doc.body.createDiv({
+			cls: "meetings-plus-picker",
+		});
 		this.el = popup;
 		this.position();
 		this.render();
@@ -57,21 +63,21 @@ export class DatePicker {
 		// Defer so the same click that opened it doesn't immediately close it.
 		window.setTimeout(() => {
 			if (this.outsideHandler) {
-				document.addEventListener("mousedown", this.outsideHandler);
+				this.doc.addEventListener("mousedown", this.outsideHandler);
 			}
 			if (this.keyHandler) {
-				document.addEventListener("keydown", this.keyHandler);
+				this.doc.addEventListener("keydown", this.keyHandler);
 			}
 		}, 0);
 	}
 
 	close(): void {
 		if (this.outsideHandler) {
-			document.removeEventListener("mousedown", this.outsideHandler);
+			this.doc.removeEventListener("mousedown", this.outsideHandler);
 			this.outsideHandler = null;
 		}
 		if (this.keyHandler) {
-			document.removeEventListener("keydown", this.keyHandler);
+			this.doc.removeEventListener("keydown", this.keyHandler);
 			this.keyHandler = null;
 		}
 		this.el?.remove();

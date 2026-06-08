@@ -84,21 +84,12 @@ function extractAuth(rawUrl: string): AuthExtraction {
 }
 
 function base64(input: string): string {
-	if (typeof btoa === "function") {
-		// Encode UTF-8 → Latin-1 → base64
-		return btoa(
-			Array.from(new TextEncoder().encode(input))
-				.map((b) => String.fromCharCode(b))
-				.join("")
-		);
-	}
-	// Node fallback (shouldn't run in Obsidian)
-	type B = { from(s: string, enc: string): { toString(enc: string): string } };
-	const g = globalThis as unknown as { Buffer?: B };
-	if (g.Buffer) {
-		return g.Buffer.from(input, "utf-8").toString("base64");
-	}
-	throw new Error("No base64 encoder available");
+	// Encode UTF-8 → Latin-1 → base64. Obsidian (Electron) always provides btoa.
+	return window.btoa(
+		Array.from(new TextEncoder().encode(input))
+			.map((b) => String.fromCharCode(b))
+			.join("")
+	);
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {

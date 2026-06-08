@@ -156,7 +156,7 @@ export default class MeetingsPlusPlugin extends Plugin {
 		const { workspace } = this.app;
 		const existing = workspace.getLeavesOfType(VIEW_TYPE_MEETINGS_PLUS);
 		if (existing.length > 0) {
-			workspace.revealLeaf(existing[0]!);
+			void workspace.revealLeaf(existing[0]!);
 			return;
 		}
 		const leaf =
@@ -165,7 +165,7 @@ export default class MeetingsPlusPlugin extends Plugin {
 			type: VIEW_TYPE_MEETINGS_PLUS,
 			active: true,
 		});
-		workspace.revealLeaf(leaf);
+		void workspace.revealLeaf(leaf);
 	}
 
 	async openOrCreateNote(meeting: Meeting): Promise<void> {

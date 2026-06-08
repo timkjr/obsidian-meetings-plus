@@ -212,7 +212,7 @@ export class MeetingsPlusView extends ItemView {
 		if (this.pendingScrollKey) {
 			const target = this.pendingScrollKey;
 			this.pendingScrollKey = null;
-			requestAnimationFrame(() => {
+			window.requestAnimationFrame(() => {
 				const el = this.contentEl.querySelector(
 					`[data-day="${target}"]`
 				);

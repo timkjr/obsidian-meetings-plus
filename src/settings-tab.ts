@@ -16,6 +16,7 @@ type BooleanKey =
 
 export class MeetingsPlusSettingTab extends PluginSettingTab {
 	plugin: MeetingsPlusPlugin;
+	private listEl: HTMLElement | null = null;
 
 	constructor(app: App, plugin: MeetingsPlusPlugin) {
 		super(app, plugin);
@@ -59,8 +60,8 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl).setName("Calendars").setHeading();
 
-		const list = containerEl.createDiv({ cls: "meetings-plus-cal-list" });
-		this.renderCalendarList(list);
+		this.listEl = containerEl.createDiv({ cls: "meetings-plus-cal-list" });
+		this.renderCalendarList(this.listEl);
 
 		new Setting(containerEl).addButton((b) =>
 			b
@@ -76,10 +77,15 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 						this.plugin.manager.refreshCalendar(cal.id).catch(() => {
 							/* error surfaced via status */
 						});
-						this.display();
+						this.refreshList();
 					}).open();
 				})
 		);
+	}
+
+	private refreshList(): void {
+		if (!this.listEl) return;
+		this.renderCalendarList(this.listEl);
 	}
 
 	private renderCalendarList(parent: HTMLElement): void {
@@ -116,7 +122,7 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 			setIcon(toggle, cal.enabled ? "toggle-right" : "toggle-left");
 			toggle.addEventListener("click", () => {
 				cal.enabled = !cal.enabled;
-				void this.plugin.saveSettings().then(() => this.display());
+				void this.plugin.saveSettings().then(() => this.refreshList());
 			});
 
 			const edit = actions.createEl("button", {
@@ -131,7 +137,7 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 					this.plugin.manager
 						.refreshCalendar(cal.id)
 						.catch(() => undefined);
-					this.display();
+					this.refreshList();
 				}).open();
 			});
 
@@ -145,7 +151,7 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 					this.plugin.settings.calendars.filter((c) => c.id !== cal.id);
 				delete this.plugin.settings.cache[cal.id];
 				this.plugin.manager.dropCalendar(cal.id);
-				void this.plugin.saveSettings().then(() => this.display());
+				void this.plugin.saveSettings().then(() => this.refreshList());
 			});
 		}
 	}
