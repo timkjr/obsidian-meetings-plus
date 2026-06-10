@@ -5,6 +5,8 @@ export interface MeetingsPlusSettings {
 	version: number;
 	refreshIntervalMinutes: number;
 	lookAheadDays: number;
+	/** How many past days the user can navigate back to. 0 disables. */
+	lookBackDays: number;
 	enableNotifications: boolean;
 	notificationLeadMinutes: number;
 	runTemplaterOnNewNotes: boolean;
@@ -99,6 +101,7 @@ export const DEFAULT_SETTINGS: MeetingsPlusSettings = {
 	version: SETTINGS_VERSION,
 	refreshIntervalMinutes: 15,
 	lookAheadDays: 7,
+	lookBackDays: 7,
 	enableNotifications: false,
 	notificationLeadMinutes: 5,
 	runTemplaterOnNewNotes: false,

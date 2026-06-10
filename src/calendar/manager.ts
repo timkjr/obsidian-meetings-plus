@@ -7,11 +7,12 @@ import { parseICS } from "./parser";
 import { MeetingCache } from "./cache";
 
 /**
- * Fixed forward window we parse meetings for. The user's `lookAheadDays`
- * setting controls what the sidebar *shows*; parsing more here gives the
- * date picker room to jump arbitrarily far without re-fetching.
+ * Fixed parse window. The user's `lookAheadDays` / `lookBackDays` settings
+ * control what the sidebar *shows*; parsing more here gives the date picker
+ * room to jump without re-fetching.
  */
 const PARSE_WINDOW_DAYS = 180;
+const PARSE_BACK_DAYS = 30;
 
 export interface CalendarManagerEvents extends Record<string, unknown> {
 	"refresh:started": { calendarId: string | null };
@@ -114,9 +115,13 @@ export class CalendarManager {
 		try {
 			const result = await fetchICS(cal.url);
 			const now = new Date();
-			const windowStart = startOfToday(now);
+			const todayStart = startOfToday(now);
+			const windowStart = new Date(
+				todayStart.getTime() -
+					PARSE_BACK_DAYS * 24 * 60 * 60 * 1000
+			);
 			const windowEnd = new Date(
-				windowStart.getTime() +
+				todayStart.getTime() +
 					PARSE_WINDOW_DAYS * 24 * 60 * 60 * 1000
 			);
 			const meetings = parseICS(result.body, {

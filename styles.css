@@ -479,6 +479,10 @@
 	color: var(--text-faint);
 }
 
+.meetings-plus-picker-past {
+	color: var(--text-muted);
+}
+
 .meetings-plus-picker-today {
 	color: var(--interactive-accent);
 	font-weight: 600;
@@ -556,6 +560,15 @@
 	border-radius: 6px;
 	padding: 8px 8px 6px;
 	margin: 0 -8px;
+}
+
+/* past days (look-back window) — dimmed but fully interactive */
+.meetings-plus-day-past {
+	opacity: 0.75;
+}
+
+.meetings-plus-day-past:hover {
+	opacity: 1;
 }
 
 .meetings-plus-day-today .meetings-plus-day-label {

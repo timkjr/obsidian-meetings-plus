@@ -10,6 +10,8 @@ export interface DatePickerOptions {
 	focusedDay: string;
 	/** YYYY-MM-DD of real today. */
 	today: string;
+	/** Earliest selectable day (today − look-back window), YYYY-MM-DD. */
+	minDay: string;
 	/** Day keys (YYYY-MM-DD) that have at least one meeting. */
 	daysWithMeetings: Set<string>;
 	onPick: (key: string) => void;
@@ -170,9 +172,12 @@ export class DatePicker {
 			if (this.opts.daysWithMeetings.has(k)) {
 				cell.addClass("meetings-plus-picker-hasevents");
 			}
-			if (k < todayKey) {
+			if (k < this.opts.minDay) {
 				cell.setAttribute("disabled", "true");
 				continue;
+			}
+			if (k < todayKey) {
+				cell.addClass("meetings-plus-picker-past");
 			}
 			cell.addEventListener("click", () => {
 				this.opts.onPick(k);

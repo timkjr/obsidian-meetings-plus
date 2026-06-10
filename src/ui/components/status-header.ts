@@ -14,6 +14,8 @@ export interface StatusHeaderOptions {
 	focusedDay: string;
 	/** YYYY-MM-DD of today */
 	today: string;
+	/** Earliest navigable day (today − lookBackDays), YYYY-MM-DD */
+	minDay: string;
 	/** Set of day keys that have at least one meeting (for picker dots) */
 	daysWithMeetings: Set<string>;
 	onRefresh: () => void;
@@ -55,11 +57,7 @@ export function renderStatusHeader(opts: StatusHeaderOptions): void {
 }
 
 function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
-	const todayDate = dateFromKey(opts.today);
 	const focusedDate = dateFromKey(opts.focusedDay);
-	const focusedOffset = Math.round(
-		(focusedDate.getTime() - todayDate.getTime()) / DAY_MS
-	);
 
 	const bar = parent.createDiv({ cls: "meetings-plus-datebar" });
 
@@ -68,9 +66,9 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 		attr: { "aria-label": "Previous day" },
 	});
 	setIcon(prev, "chevron-left");
-	if (focusedOffset <= 0) prev.setAttribute("disabled", "true");
+	if (opts.focusedDay <= opts.minDay) prev.setAttribute("disabled", "true");
 	prev.addEventListener("click", () => {
-		if (focusedOffset <= 0) return;
+		if (opts.focusedDay <= opts.minDay) return;
 		const next = new Date(focusedDate.getTime() - DAY_MS);
 		opts.onPickDay(keyFromDate(next));
 	});
@@ -91,6 +89,7 @@ function renderDateBar(parent: HTMLElement, opts: StatusHeaderOptions): void {
 			anchor: label,
 			focusedDay: opts.focusedDay,
 			today: opts.today,
+			minDay: opts.minDay,
 			daysWithMeetings: opts.daysWithMeetings,
 			onPick: (k) => opts.onPickDay(k),
 		});

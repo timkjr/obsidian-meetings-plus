@@ -90,10 +90,15 @@ export class MeetingsPlusView extends ItemView {
 		}));
 
 		const lookAhead = Math.max(1, this.plugin.settings.lookAheadDays);
+		const lookBack = Math.max(
+			0,
+			Math.min(30, this.plugin.settings.lookBackDays)
+		);
 		const now = Date.now();
 		const today = startOfDay(new Date(now));
 		const todayKey = dayKey(today);
-		if (this.focusedDay < todayKey) this.focusedDay = todayKey;
+		const minKey = dayKey(new Date(today.getTime() - lookBack * DAY_MS));
+		if (this.focusedDay < minKey) this.focusedDay = minKey;
 
 		// daysWithMeetings is computed lazily below; pre-compute now for the
 		// header (the picker needs it even before we render the agenda).
@@ -109,6 +114,7 @@ export class MeetingsPlusView extends ItemView {
 			lookAheadDays: lookAhead,
 			focusedDay: this.focusedDay,
 			today: todayKey,
+			minDay: minKey,
 			daysWithMeetings: allDaysWithMeetings,
 			onRefresh: () => {
 				void this.plugin.manager.refreshAll();
@@ -185,7 +191,12 @@ export class MeetingsPlusView extends ItemView {
 			}
 
 			renderedAny = true;
-			const label = dayLabel(date, isTodayKey, isTomorrow(date, today));
+			const label = dayLabel(
+				date,
+				isTodayKey,
+				isTomorrow(date, today),
+				isYesterday(date, today)
+			);
 			this.renderDay(
 				agenda,
 				key,
@@ -193,6 +204,7 @@ export class MeetingsPlusView extends ItemView {
 				dayMeetings,
 				calIndex,
 				isTodayKey,
+				key < todayKey,
 				now,
 				isFocusedDay
 			);
@@ -258,12 +270,14 @@ export class MeetingsPlusView extends ItemView {
 		meetings: Meeting[],
 		calIndex: Map<string, CalendarConfig>,
 		isToday: boolean,
+		isPast: boolean,
 		now: number,
 		isFocusedDay: boolean
 	): void {
 		const day = parent.createDiv({ cls: "meetings-plus-day" });
 		day.setAttribute("data-day", key);
 		if (isToday) day.addClass("meetings-plus-day-today");
+		if (isPast) day.addClass("meetings-plus-day-past");
 
 		const header = day.createDiv({ cls: "meetings-plus-day-header" });
 		header.createSpan({
@@ -493,8 +507,19 @@ function isTomorrow(d: Date, today: Date): boolean {
 	return dayKey(d) === dayKey(tomorrow);
 }
 
-function dayLabel(d: Date, isToday: boolean, isTom: boolean): string {
+function isYesterday(d: Date, today: Date): boolean {
+	const yesterday = new Date(today.getTime() - DAY_MS);
+	return dayKey(d) === dayKey(yesterday);
+}
+
+function dayLabel(
+	d: Date,
+	isToday: boolean,
+	isTom: boolean,
+	isYest: boolean
+): string {
 	if (isToday) return "Today";
 	if (isTom) return "Tomorrow";
+	if (isYest) return "Yesterday";
 	return moment(d).format("ddd, MMM D");
 }

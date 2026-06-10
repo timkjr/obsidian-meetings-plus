@@ -7,6 +7,7 @@ import { generateId } from "./util/id";
 type NumericKey =
 	| "refreshIntervalMinutes"
 	| "lookAheadDays"
+	| "lookBackDays"
 	| "notificationLeadMinutes";
 
 type BooleanKey =
@@ -36,6 +37,13 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 			"Look-ahead window (days)",
 			"How many days of future meetings to load.",
 			"lookAheadDays"
+		);
+		this.numberField(
+			"Look-back window (days)",
+			"How many days of past meetings you can navigate back to. Set to 0 to disable.",
+			"lookBackDays",
+			0,
+			30
 		);
 		this.toggle(
 			"Enable pre-meeting notifications",
@@ -169,7 +177,13 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 			);
 	}
 
-	private numberField(name: string, desc: string, key: NumericKey): void {
+	private numberField(
+		name: string,
+		desc: string,
+		key: NumericKey,
+		min = 1,
+		max?: number
+	): void {
 		new Setting(this.containerEl)
 			.setName(name)
 			.setDesc(desc)
@@ -179,8 +193,11 @@ export class MeetingsPlusSettingTab extends PluginSettingTab {
 				t.setValue(String(this.plugin.settings[key]));
 				t.onChange(async (v) => {
 					const n = parseInt(v, 10);
-					this.plugin.settings[key] =
-						Number.isFinite(n) && n > 0 ? n : fallback;
+					let value = fallback;
+					if (Number.isFinite(n) && n >= min) {
+						value = max !== undefined ? Math.min(n, max) : n;
+					}
+					this.plugin.settings[key] = value;
 					await this.plugin.saveSettings();
 					this.plugin.manager.onSettingsChanged();
 				});
