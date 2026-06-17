@@ -103,9 +103,15 @@ export class MeetingsPlusView extends ItemView {
 		// daysWithMeetings is computed lazily below; pre-compute now for the
 		// header (the picker needs it even before we render the agenda).
 		// Honors disabled-calendar and skip-today filters via visibleMeetings().
-		const allDaysWithMeetings = new Set(
-			this.visibleMeetings().map((m) => dayKey(m.start))
-		);
+		const allDaysWithMeetings = new Set<string>();
+		for (const m of this.visibleMeetings()) {
+			allDaysWithMeetings.add(dayKey(m.start));
+			if (m.allDay && m.end.getTime() > m.start.getTime() + DAY_MS) {
+				for (let t = m.start.getTime() + DAY_MS; t < m.end.getTime(); t += DAY_MS) {
+					allDaysWithMeetings.add(dayKey(new Date(t)));
+				}
+			}
+		}
 
 		renderStatusHeader({
 			parent: root,
@@ -145,6 +151,13 @@ export class MeetingsPlusView extends ItemView {
 			const k = dayKey(m.start);
 			if (!byDay.has(k)) byDay.set(k, []);
 			byDay.get(k)!.push(m);
+			if (m.allDay && m.end.getTime() > m.start.getTime() + DAY_MS) {
+				for (let t = m.start.getTime() + DAY_MS; t < m.end.getTime(); t += DAY_MS) {
+					const dk = dayKey(new Date(t));
+					if (!byDay.has(dk)) byDay.set(dk, []);
+					byDay.get(dk)!.push(m);
+				}
+			}
 		}
 
 		// Current/imminent card — only when focused on today
