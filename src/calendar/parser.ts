@@ -141,10 +141,6 @@ export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 
 	const meetings: Meeting[] = [];
 	const seen = new Set<string>();
-	// Pass the seed in UTC. Local-time seeds confuse the iterator when the
-	// event's TZID differs from the user's TZ (caused yesterday's recurring
-	// instances to leak into today after midnight, issue #3).
-	const windowStartTime = ICAL.Time.fromJSDate(windowStart, true);
 
 	for (const vevent of root.getAllSubcomponents("vevent")) {
 		const event = new ICAL.Event(vevent) as unknown as MinimalEvent;
@@ -160,9 +156,12 @@ export function parseICS(ics: string, opts: ParseOptions): Meeting[] {
 			const masterDurationMs =
 				masterEnd.getTime() - masterStart.getTime();
 
-			const iter = event.iterator(
-				windowStartTime as unknown as MinimalTime
-			);
+			// Do not seed the iterator with windowStart — doing so resets the
+			// recurrence epoch and breaks INTERVAL>1 patterns (e.g.
+			// FREQ=MONTHLY;INTERVAL=2 starting in February would skip June).
+			// The existing `end <= windowStart` filter below handles skipping
+			// past occurrences correctly without perturbing the epoch.
+			const iter = event.iterator();
 			let count = 0;
 			while (count < MAX_RECURRENCE_OCCURRENCES) {
 				const next = iter.next();
